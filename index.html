@@ -5,7 +5,7 @@
 *{box-sizing:border-box}body{margin:0;background:var(--white);color:var(--ink);font:400 16px/24px "IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
 .present{max-width:820px;margin:0 auto;padding:36px 20px 60px}
 .pr-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;color:var(--muted);font-size:14px;flex-wrap:wrap}.pr-top img{height:34px}
-h1{font-size:26px;line-height:34px;margin:0 0 18px;font-weight:700}
+h1{font-size:30px;line-height:36px;margin:0 0 20px;font-weight:700;letter-spacing:-.01em}.eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin:0 0 6px}.h1sub{display:block;font-size:15px;line-height:22px;font-weight:400;color:var(--muted);margin-top:4px}
 .pr-card{border:1px solid var(--card-border);border-radius:14px;overflow:hidden}
 .pr-row{display:grid;grid-template-columns:40px 1fr auto;gap:16px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}.pr-row:last-child{border-bottom:0}.pr-row img{width:40px;height:40px;border-radius:999px}
 .pr-n{font-size:18px;font-weight:600}.pr-d{font-size:14px;color:var(--muted);line-height:20px;margin-top:2px}
@@ -44,7 +44,8 @@ function render(v){
     <div class="step ${v.paidAt?'done':''}"><span class="n">${v.paidAt?'✓':'2'}</span><div><div class="t">Make your first payment</div><div class="d">${v.paidAt?'Received. Your subscription is active.':'Pay '+money2(v.todayAmount)+' by card. Later instalments and renewals charge the same card automatically.'}</div></div>${v.payUrl&&!v.paidAt?`<a class="btn ${v.signedAt?'':'ghost'}" href="${v.payUrl}" target="_blank" rel="noopener">${v.signedAt?'Pay now':'After signing'}</a>`:''}</div>
   </div>`:'';
   $('#root').innerHTML=`<div class="pr-top"><img src="${LOGO}" alt="RocketPlan"><span>${sent?'Your order':'<span class="live">Live</span> · updates as we talk'}</span></div>
-    <h1>${esc(v.company||v.contactName||'Your')} RocketPlan package<span style="display:block;font-size:14px;font-weight:400;color:var(--muted);margin-top:2px">Prepared for <b style="color:var(--ink);font-weight:600">${esc(v.contactName||'you')}</b>${v.company&&v.contactName?', '+esc(v.company):''} by ${esc(v.rep)}</span></h1>
+    <div class="eyebrow">Your RocketPlan package</div>
+    <h1>Prepared for ${esc(v.contactName||v.company||'you')}<span class="h1sub">${v.company&&v.contactName?esc(v.company)+' · ':''}by ${esc(v.rep)}, RocketPlan</span></h1>
     ${v.lines.length?`<div class="pr-card">${rows}${fee}</div>${sched}
     <div class="pr-grid">
       <div class="pr-stat"><div class="pr-l">Plan</div><div class="pr-b" style="font-size:18px">${plan}</div></div>
