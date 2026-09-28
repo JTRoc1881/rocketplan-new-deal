@@ -90,6 +90,7 @@ button,input,select{font:inherit;color:inherit}
 .seg input:focus-visible~.box{outline:2px solid var(--purple);outline-offset:2px}
 .seg .nm{font-weight:600;display:block}.seg .ds{font-size:12.5px;color:var(--muted);line-height:17px;display:block}
 .seg .amt{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;text-align:right}.seg .amt small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.talk-bar{margin-top:12px;display:flex;align-items:center;gap:10px}.talk-btn{border:1px solid var(--border);background:var(--white);padding:6px 12px;font-size:13px}.talk-btn[aria-expanded="true"]{background:var(--purple-light);border-color:var(--purple)}.talk-hint{font-size:12px;color:var(--muted)}.talk-l .talk-close{float:right;font-size:12px;padding:0 4px;text-transform:none;letter-spacing:0}
 .talk{margin-top:12px;padding:14px 16px 14px 18px;border-radius:10px;background:var(--bg);border-left:3px solid var(--purple)}.talk-l{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--purple)}.talk-q{margin-top:4px;font-size:15px;line-height:22px;font-style:italic;color:var(--ink)}.talk-s{margin-top:6px;font-size:12.5px;line-height:18px;color:var(--muted)}
 .plan-note{margin-top:10px;font-size:13px;line-height:19px;color:var(--icon)}.plan-note b{color:var(--ink);font-weight:600}
 /* schedule */
@@ -245,7 +246,8 @@ button,input,select{font:inherit;color:inherit}
             <label><input type="radio" name="plan" value="quarterly"><span class="box"></span><span><span class="nm">Quarterly payments</span><span class="ds">4 payments, every 3 months.</span></span><span class="amt" id="amt-quarterly"></span></label>
             <label><input type="radio" name="plan" value="monthly"><span class="box"></span><span><span class="nm">Monthly payments</span><span class="ds">12 payments, every month.</span></span><span class="amt" id="amt-monthly"></span></label>
           </div>
-          <div class="talk" id="talk" hidden><div class="talk-l">Say this</div><div class="talk-q" id="talk-q"></div><div class="talk-s" id="talk-s"></div></div>
+          <div class="talk-bar" id="talk-bar" hidden><button class="link talk-btn" id="talk-toggle" type="button" aria-expanded="false">Talk track</button><span class="talk-hint">Hidden until you open it, so it stays off a shared screen.</span></div>
+          <div class="talk" id="talk" hidden><div class="talk-l">Say this <button class="link talk-close" id="talk-close" type="button">Hide</button></div><div class="talk-q" id="talk-q"></div><div class="talk-s" id="talk-s"></div></div>
           <div class="plan-note" id="plan-note"></div>
           <div class="sched" id="sched">
             <table><thead><tr><th style="width:100px">Share</th><th>Due</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody id="sched-rows"></tbody></table>
@@ -421,7 +423,7 @@ function render(){
     quarterly:'<b>4 quarterly payments, then annual.</b> Three months of the monthly rate per payment. At month 12 the subscription renews at the annual list price, paid in full.',
     monthly:'<b>12 monthly payments, then annual.</b> Annual ÷ 10 per month. At month 12 the subscription renews at the annual list price, paid in full.'};
   $('#plan-note').innerHTML=notes[state.plan];
-  const talk=$('#talk');talk.hidden=!has;
+  $('#talk-bar').hidden=!has;if(!has){talkOpen=false;}const talk=$('#talk');talk.hidden=!(has&&talkOpen);$('#talk-toggle').setAttribute('aria-expanded',String(has&&talkOpen));
   if(has){const q=money(p.perQuarter),m=money(p.perMonth);
     const t={full:[`“We can also finance this over the year at no interest. Would ${m} a month or ${q} a quarter work better for your cash flow?”`,`Use this if the client hesitates on the price. Same 12-month term, same price, no interest. If they say yes, pick Quarterly or Monthly above.`],
       split:[`“No interest on this. Let's put the first payment today and spread the rest on dates that suit you.”`,`Set the shares and dates below. The first share is charged when they sign.`],
@@ -458,6 +460,10 @@ function snapshot(){return {packages:[...state.packages],override:state.override
 let dealCode=null,saveTimer=null,dirty=false,locked=false;
 function persist(){if(locked)return;dirty=true;clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,600);}
 async function saveNow(){if(!dirty||locked)return;dirty=false;try{const r=await api('/api/deals/'+(dealCode||'new'),{method:'PUT',body:JSON.stringify({deal:snapshot(),contact:state.client,rep:REP,email:REP_EMAIL})});dealCode=r.code;$('#deal-code').textContent=dealCode;}catch(e){toast('Could not save: '+e.message);}}
+let talkOpen=false;
+$('#talk-toggle').addEventListener('click',()=>{talkOpen=!talkOpen;render();});
+$('#talk-close').addEventListener('click',()=>{talkOpen=false;render();});
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&talkOpen){talkOpen=false;render();}});
 function toast(t,ms=3200){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),ms);}
 // ---------- live link + send ----------
 $('#sharelink').addEventListener('click',async()=>{dirty=true;await saveNow();if(!dealCode)return;$('#sharelink').disabled=true;$('#sharelink').textContent='Sending…';
