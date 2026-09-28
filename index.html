@@ -9,6 +9,7 @@
   color-scheme:light;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/22px var(--font);-webkit-font-smoothing:antialiased}
 button,input,select{font:inherit;color:inherit}
 .wrap{max-width:1180px;margin:0 auto;padding-block:20px 56px;padding-inline:20px}
@@ -41,7 +42,7 @@ button,input,select{font:inherit;color:inherit}
 .menu button{display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 14px;border:0;background:none;text-align:left;cursor:pointer}
 .menu button:hover,.menu button.active{background:var(--purple-light)}
 .menu small{color:var(--muted);font-size:13px}.menu .none{padding:12px 14px;color:var(--muted);font-size:14px}
-.menu .add{border-top:1px solid var(--border);color:var(--purple);font-weight:600}.menu .add small{color:var(--muted);font-weight:400}
+.combo .input{padding-right:52px}.combo .plus{position:absolute;right:6px;top:6px;width:34px;height:34px;border:1px solid var(--border);border-radius:999px;background:var(--white);color:var(--icon);font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}.combo .plus:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-light)}
 .newc{border:1px solid var(--card-border);border-radius:var(--r-md);background:var(--white);padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px}
 .newc h3{grid-column:1/-1;margin:0;font-size:15px;font-weight:600}.newc label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}.newc label.w{grid-column:1/-1}
 .newc input{height:40px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-sm);font:inherit;font-size:14px;color:var(--ink);background:var(--white)}.newc input:focus{outline:none;border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
@@ -207,6 +208,7 @@ button,input,select{font:inherit;color:inherit}
           <span class="lbl">Contact</span>
           <div class="combo" id="combo">
             <input class="input" id="client-search" type="text" placeholder="Search by name, company or email" autocomplete="off" aria-label="Client">
+            <button class="plus" id="client-new" type="button" title="New contact (not in GHL yet)" aria-label="New contact">+</button>
             <div class="menu" id="client-menu" hidden></div>
           </div>
           <form class="newc" id="newc" hidden autocomplete="off">
@@ -356,15 +358,15 @@ let hi=0;
 let searchTimer=null,searching=false;
 function renderMenu(){const q=search.value.trim();
   if(q.length<2){menu.innerHTML='<div class="none">Type at least two letters.</div>';menu.hidden=false;return;}
-  menu.innerHTML=CONTACTS.length?CONTACTS.map((c,i)=>`<button type="button" data-id="${c.id}" class="${i===hi?'active':''}"><span>${esc(c.name)} <small>· ${esc(c.company||'')}</small></span><small>${esc(c.email||'no email')}${c.phone?'':' · no phone'}</small></button>`).join(''):(searching?'<div class="none">Searching…</div>':`<div class="none">No client matching "${esc(q)}".</div>`);
-  if(!searching)menu.innerHTML+=`<button type="button" class="add" data-new="1"><span>+ Create new contact <small>· "${esc(q)}" is not in the CRM yet</small></span></button>`;
+  menu.innerHTML=CONTACTS.length?CONTACTS.map((c,i)=>`<button type="button" data-id="${c.id}" class="${i===hi?'active':''}"><span>${esc(c.name)} <small>· ${esc(c.company||'')}</small></span><small>${esc(c.email||'no email')}${c.phone?'':' · no phone'}</small></button>`).join(''):(searching?'<div class="none">Searching…</div>':`<div class="none">No client matching "${esc(q)}". Use + to add them.</div>`);
   menu.hidden=false;}
 search.addEventListener('input',()=>{hi=0;clearTimeout(searchTimer);const q=search.value.trim();if(q.length<2){CONTACTS=[];renderMenu();return;}searching=true;renderMenu();searchTimer=setTimeout(async()=>{try{const r=await api('/api/contacts?q='+encodeURIComponent(q));CONTACTS=r.contacts||[];}catch(e){CONTACTS=[];}searching=false;renderMenu();},250);});
 search.addEventListener('focus',renderMenu);
-search.addEventListener('keydown',(e)=>{const n=menu.querySelectorAll('button').length;if(e.key==='ArrowDown'){hi=Math.min(n-1,hi+1);renderMenu();e.preventDefault();}if(e.key==='ArrowUp'){hi=Math.max(0,hi-1);renderMenu();e.preventDefault();}if(e.key==='Enter'){const b=menu.querySelectorAll('button')[hi];if(b)b.dataset.new?openNew():pick(b.dataset.id);e.preventDefault();}if(e.key==='Escape')menu.hidden=true;});
-menu.addEventListener('mousedown',(e)=>{const b=e.target.closest('button');if(b){b.dataset.new?openNew():pick(b.dataset.id);e.preventDefault();}});
+search.addEventListener('keydown',(e)=>{const n=menu.querySelectorAll('button').length;if(e.key==='ArrowDown'){hi=Math.min(n-1,hi+1);renderMenu();e.preventDefault();}if(e.key==='ArrowUp'){hi=Math.max(0,hi-1);renderMenu();e.preventDefault();}if(e.key==='Enter'){const b=menu.querySelectorAll('button')[hi];if(b)pick(b.dataset.id);e.preventDefault();}if(e.key==='Escape')menu.hidden=true;});
+menu.addEventListener('mousedown',(e)=>{const b=e.target.closest('button');if(b){pick(b.dataset.id);e.preventDefault();}});
 // ---------- create a contact that is not in GHL yet ----------
 const newc=$('#newc');
+$('#client-new').addEventListener('click',openNew);
 function openNew(){menu.hidden=true;$('#combo').hidden=true;newc.hidden=false;
   const q=search.value.trim(),at=q.indexOf('@')>0;const parts=at?[]:q.split(/\s+/);
   $('#nc-first').value=parts[0]||'';$('#nc-last').value=parts.slice(1).join(' ');$('#nc-email').value=at?q:'';$('#nc-company').value='';$('#nc-phone').value='';
