@@ -44,7 +44,7 @@ function render(v){
     <div class="step ${v.paidAt?'done':''}"><span class="n">${v.paidAt?'✓':'2'}</span><div><div class="t">Make your first payment</div><div class="d">${v.paidAt?'Received. Your subscription is active.':'Pay '+money2(v.todayAmount)+' by card. Later instalments and renewals charge the same card automatically.'}</div></div>${v.payUrl&&!v.paidAt?`<a class="btn ${v.signedAt?'':'ghost'}" href="${v.payUrl}" target="_blank" rel="noopener">${v.signedAt?'Pay now':'After signing'}</a>`:''}</div>
   </div>`:'';
   $('#root').innerHTML=`<div class="pr-top"><img src="${LOGO}" alt="RocketPlan"><span>${sent?'Your order':'<span class="live">Live</span> · updates as we talk'}</span></div>
-    <h1>${esc(v.company||v.contactName||'Your')} RocketPlan package<span style="display:block;font-size:14px;font-weight:400;color:var(--muted);margin-top:2px">prepared by ${esc(v.rep)}</span></h1>
+    <h1>${esc(v.company||v.contactName||'Your')} RocketPlan package<span style="display:block;font-size:14px;font-weight:400;color:var(--muted);margin-top:2px">Prepared for <b style="color:var(--ink);font-weight:600">${esc(v.contactName||'you')}</b>${v.company&&v.contactName?', '+esc(v.company):''} by ${esc(v.rep)}</span></h1>
     ${v.lines.length?`<div class="pr-card">${rows}${fee}</div>${sched}
     <div class="pr-grid">
       <div class="pr-stat"><div class="pr-l">Plan</div><div class="pr-b" style="font-size:18px">${plan}</div></div>
