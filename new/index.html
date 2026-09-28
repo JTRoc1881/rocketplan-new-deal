@@ -309,7 +309,13 @@ button,input,select{font:inherit;color:inherit}
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 // ---------- pricing (pure) ----------
-const Q=new URLSearchParams(location.search);const REP=Q.get('rep')||Q.get('name')||'RocketPlan';const REP_EMAIL=Q.get('email')||'';const KEY=Q.get('k')||'';const API='https://irrxupzubigjytxeeapu.supabase.co/functions/v1/new-deal';let PACKAGES=[];
+const Q=new URLSearchParams(location.search);
+// Name and email normally arrive from the RocketCRM sidebar link ({{user.name}}, {{user.email}}). A bare link asks once and remembers.
+let REP=Q.get('rep')||Q.get('name')||'',REP_EMAIL=Q.get('email')||'';
+try{if(!REP){REP=localStorage.getItem('nd_rep')||'';REP_EMAIL=REP_EMAIL||localStorage.getItem('nd_rep_email')||'';}
+  if(!REP){REP=(prompt('Your name, as the client should see it (for example: Perry Griffin)')||'').trim();if(REP){REP_EMAIL=REP_EMAIL||(prompt('Your RocketPlan email')||'').trim();localStorage.setItem('nd_rep',REP);localStorage.setItem('nd_rep_email',REP_EMAIL);}}
+}catch(e){}
+if(!REP)REP='RocketPlan';const KEY=Q.get('k')||'';const API='https://irrxupzubigjytxeeapu.supabase.co/functions/v1/new-deal';let PACKAGES=[];
 const api=(p,o={})=>fetch(API+p,{...o,headers:{'x-app-key':KEY,'content-type':'application/json',...(o.headers||{})}}).then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j;});
 let CONTACTS=[];
 const money=(n)=>'$'+Math.round(n).toLocaleString('en-US');
