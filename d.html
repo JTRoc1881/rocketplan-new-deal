@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your RocketPlan package</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--purple:#9A00FF;--purple-2:#6D00E6;--purple-light:#F4E5FF;--ink:#1E0D47;--white:#fff;--bg:#F3F3F6;--border:#E8E7ED;--card-border:#D2CFDA;--muted:#777185;--icon:#5B476B;--green-dark:#007760;--green:#40C9AE;--green-light:#DCF5F0}
+*{box-sizing:border-box}body{margin:0;background:var(--white);color:var(--ink);font:400 16px/24px "IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.present{max-width:820px;margin:0 auto;padding:36px 20px 60px}
+.pr-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;color:var(--muted);font-size:14px;flex-wrap:wrap}.pr-top img{height:34px}
+h1{font-size:26px;line-height:34px;margin:0 0 18px;font-weight:700}
+.pr-card{border:1px solid var(--card-border);border-radius:14px;overflow:hidden}
+.pr-row{display:grid;grid-template-columns:40px 1fr auto;gap:16px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}.pr-row:last-child{border-bottom:0}.pr-row img{width:40px;height:40px;border-radius:999px}
+.pr-n{font-size:18px;font-weight:600}.pr-d{font-size:14px;color:var(--muted);line-height:20px;margin-top:2px}
+.pr-v{font-size:20px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.pr-v small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.pr-tag{font-size:12px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:999px;vertical-align:middle}
+.pr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
+.pr-stat{border:1px solid var(--border);border-radius:12px;padding:16px 18px}.pr-stat.hi{background:var(--purple-light);border-color:#E9D3FF}.pr-stat.hi .pr-b{color:var(--purple)}
+.pr-l{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.pr-b{font-size:22px;line-height:30px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}.pr-s{font-size:13px;color:var(--muted);margin-top:2px}
+.pr-empty{padding:80px 0;text-align:center;color:var(--muted);font-size:18px}
+.steps{margin-top:22px;display:grid;gap:10px}
+.step{display:grid;grid-template-columns:32px 1fr auto;gap:14px;align-items:center;padding:16px 18px;border:1px solid var(--border);border-radius:12px}
+.step .n{width:32px;height:32px;border-radius:999px;background:var(--purple-light);color:var(--purple);font-weight:700;display:flex;align-items:center;justify-content:center}
+.step.done .n{background:var(--green-light);color:var(--green-dark)}.step .t{font-weight:600}.step .d{font-size:13px;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 18px;border-radius:8px;background:var(--purple);color:#fff;font-weight:600;text-decoration:none;white-space:nowrap}.btn:hover{background:var(--purple-2)}.btn.ghost{background:var(--white);color:var(--muted);border:1px solid var(--border);pointer-events:none}
+.sched{margin-top:16px;border:1px solid var(--border);border-radius:12px;padding:14px 18px;font-size:14px}.sched div{display:flex;justify-content:space-between;padding:4px 0;color:var(--icon)}.sched b{color:var(--ink)}
+.pr-foot{margin-top:28px;text-align:center;font-size:13px;color:var(--muted)}
+.live{display:inline-flex;align-items:center;gap:6px}.live::before{content:"";width:8px;height:8px;border-radius:999px;background:var(--green);animation:p 1.6s infinite}@keyframes p{50%{opacity:.3}}
+@media (prefers-reduced-motion:reduce){.live::before{animation:none}}
+</style></head><body>
+<div class="present" id="root"><div class="pr-empty">Loading your package…</div></div>
+<script>
+const CODE=(new URLSearchParams(location.search).get('c')||'').toUpperCase();const API='https://irrxupzubigjytxeeapu.supabase.co/functions/v1/new-deal';const $=s=>document.querySelector(s);
+const money=n=>'$'+Math.round(n).toLocaleString('en-US');const money2=n=>Math.abs(n-Math.round(n))<0.005?money(n):'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtDate=iso=>new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const LOGO='https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c69030ace6166590c7d808e_1200_80.webp',MARK='https://msgsndr-private.storage.googleapis.com/companyPhotos/49c30135-8b71-4e68-9941-e496becf95f9.png';
+let last='';
+function render(v){
+  const sent=['sent','signed','paid'].includes(v.status);
+  const rows=v.lines.map(l=>`<div class="pr-row"><img src="${MARK}" alt=""><div><div class="pr-n">${esc(l.name)}</div><div class="pr-d">${esc(l.desc)}</div></div><div class="pr-v">${money(l.unit)}<small>${l.every?'every '+l.every:'one time'}</small></div></div>`).join('');
+  const fee=v.lines.length&&v.fee?`<div class="pr-row"><img src="${MARK}" alt=""><div><div class="pr-n">Set Up Fee${v.waive?' <span class="pr-tag">waived</span>':''}</div><div class="pr-d">One-time onboarding, account setup and training.</div></div><div class="pr-v">${money(v.fee)}<small>one time</small></div></div>`:'';
+  const plan={full:'Paid in full, renews yearly',split:'Split payments on agreed dates',quarterly:'4 quarterly payments',monthly:'12 monthly payments'}[v.plan];
+  const sched=v.split&&v.lines.length?`<div class="sched">${v.split.map((r,i)=>`<div><span>${i===0?'At signing':fmtDate(r.date)}</span><b>${money2(v.total*r.pct/100)}</b></div>`).join('')}</div>`:'';
+  const steps=sent?`<div class="steps">
+    <div class="step ${v.signedAt?'done':''}"><span class="n">${v.signedAt?'✓':'1'}</span><div><div class="t">Review and sign the order form</div><div class="d">${v.signedAt?'Signed. Thank you.':'We emailed it to you. Open it, tick the three confirmations and sign.'}</div></div>${v.signUrl&&!v.signedAt?`<a class="btn" href="${v.signUrl}" target="_blank" rel="noopener">Open the form</a>`:''}</div>
+    <div class="step ${v.paidAt?'done':''}"><span class="n">${v.paidAt?'✓':'2'}</span><div><div class="t">Make your first payment</div><div class="d">${v.paidAt?'Received. Your subscription is active.':'Pay '+money2(v.todayAmount)+' by card. Later instalments and renewals charge the same card automatically.'}</div></div>${v.payUrl&&!v.paidAt?`<a class="btn ${v.signedAt?'':'ghost'}" href="${v.payUrl}" target="_blank" rel="noopener">${v.signedAt?'Pay now':'After signing'}</a>`:''}</div>
+  </div>`:'';
+  $('#root').innerHTML=`<div class="pr-top"><img src="${LOGO}" alt="RocketPlan"><span>${sent?'Your order':'<span class="live">Live</span> · updates as we talk'}</span></div>
+    <h1>${esc(v.company||v.contactName||'Your')} RocketPlan package<span style="display:block;font-size:14px;font-weight:400;color:var(--muted);margin-top:2px">prepared by ${esc(v.rep)}</span></h1>
+    ${v.lines.length?`<div class="pr-card">${rows}${fee}</div>${sched}
+    <div class="pr-grid">
+      <div class="pr-stat"><div class="pr-l">Plan</div><div class="pr-b" style="font-size:18px">${plan}</div></div>
+      <div class="pr-stat"><div class="pr-l">First-year total</div><div class="pr-b">${money2(v.total)}</div>${v.off?`<div class="pr-s">includes ${money2(v.off)} off</div>`:''}</div>
+      <div class="pr-stat hi"><div class="pr-l">Due at signing</div><div class="pr-b">${money2(v.todayAmount)}</div></div>
+      <div class="pr-stat"><div class="pr-l">Renews</div><div class="pr-b" style="font-size:18px">${fmtDate(v.renews)}</div><div class="pr-s">${money(v.annualList)} / year, list price</div></div>
+    </div>${steps}`:`<div class="pr-empty">${esc(v.rep)} is building your package. It will appear here.</div>`}
+    <div class="pr-foot">12-month subscription · cancel any time before renewal · prices in USD, taxes excluded</div>`;
+}
+async function tick(){try{const r=await fetch(API+'/api/public/'+CODE,{cache:'no-store'});if(!r.ok)throw 0;const v=await r.json();const s=JSON.stringify(v);if(s!==last){last=s;render(v);}}catch(e){if(!last)$('#root').innerHTML='<div class="pr-empty">This link is not valid.</div>';}}
+tick();setInterval(tick,4000);
+</script></body></html>

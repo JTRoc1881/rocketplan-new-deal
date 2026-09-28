@@ -1,0 +1,1 @@
+RocketPlan New Deal: static pages for the deal builder (index.html, opened from the GHL sidebar with the app key) and the client live page (d.html?c=CODE). The API lives in the RocketPlan Intelligence Supabase project (edge function new-deal). No secrets here.

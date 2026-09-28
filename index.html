@@ -1,0 +1,500 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RocketPlan New Deal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --purple:#9A00FF;--purple-2:#6D00E6;--purple-light:#F4E5FF;--input-border:#9A00FF80;--input-hover:#FCF8FF;
+  --ink:#1E0D47;--white:#FFFFFF;--bg:#F3F3F6;--border:#E8E7ED;--card-border:#D2CFDA;--muted:#777185;--icon:#5B476B;
+  --green-dark:#007760;--green:#40C9AE;--green-light:#DCF5F0;--red:#E82828;--warn-bg:#FFEFD3;
+  --r-sm:4px;--r-md:8px;--r-lg:12px;--font:"IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/22px var(--font);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 56px;padding-inline:20px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:26px}
+.top img{height:32px;width:auto;display:block}
+.top .who{font-size:13px;color:var(--muted)}.top .who b{color:var(--ink);font-weight:600}
+.title{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 22px}
+.title h1{font-size:30px;line-height:36px;font-weight:700;margin:0 0 4px}
+.title p{margin:0;color:var(--muted);font-size:14px}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.status::before{content:"";width:8px;height:8px;border-radius:999px;background:var(--purple)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}.summary{position:static}}
+.card{background:var(--white);border:1px solid var(--card-border);border-radius:14px;box-shadow:0 1px 2px rgba(30,13,71,.04),0 8px 24px rgba(30,13,71,.05)}
+/* step rows */
+.sec{display:grid;grid-template-columns:210px minmax(0,1fr);gap:28px;padding:30px 32px;border-bottom:1px solid var(--border)}
+.sec:last-child{border-bottom:0}
+@media (max-width:700px){.sec{grid-template-columns:1fr;gap:12px;padding:20px}}
+.sec .lead{display:flex;gap:12px;align-items:flex-start}
+.sec .num{flex:0 0 auto;width:28px;height:28px;border-radius:999px;background:var(--purple-light);color:var(--purple);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;transition:background .15s,color .15s}
+.sec .num.done{background:var(--green-light);color:var(--green-dark)}
+.sec h2{font-size:17px;line-height:22px;font-weight:700;margin:0 0 3px}
+.sec .sub{font-size:13px;line-height:18px;color:var(--muted);margin:0}
+.lbl{display:block;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+/* client */
+.combo{position:relative}
+.input{width:100%;height:46px;padding:0 14px 0 40px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--white) no-repeat 14px center/16px url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235B476B' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m20 20-3.5-3.5'/></svg>");outline:none;transition:border-color .15s}
+.input:focus{border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
+.menu{position:absolute;left:0;right:0;top:48px;background:var(--white);border:1px solid var(--card-border);border-radius:var(--r-md);box-shadow:0 12px 32px rgba(30,13,71,.12);z-index:5;overflow:hidden;max-height:280px;overflow-y:auto}
+.menu button{display:flex;flex-direction:column;align-items:flex-start;width:100%;padding:10px 14px;border:0;background:none;text-align:left;cursor:pointer}
+.menu button:hover,.menu button.active{background:var(--purple-light)}
+.menu small{color:var(--muted);font-size:13px}.menu .none{padding:12px 14px;color:var(--muted);font-size:14px}
+.chosen{display:flex;align-items:center;justify-content:space-between;gap:12px;height:46px;padding:0 16px;border:1px solid var(--purple);background:var(--purple-light);border-radius:10px}
+.chosen b{font-weight:600}.chosen .em{font-size:13px;color:var(--muted);margin-top:4px}
+.link{background:none;border:0;color:var(--purple);font-weight:600;cursor:pointer;padding:6px 8px;border-radius:var(--r-sm);font-size:14px}
+.link:hover{background:var(--purple-light)}
+/* package rows */
+.list{display:flex;flex-direction:column;gap:10px}
+.list+.lbl{margin-top:20px}
+.pk{position:relative;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--white);cursor:pointer;transition:background .12s,border-color .12s,box-shadow .12s}
+.pk:hover{background:var(--input-hover);border-color:var(--card-border)}
+.pk:has(input:checked){background:var(--purple-light);border-color:var(--purple);box-shadow:0 0 0 1px var(--purple) inset}
+.pk input[type=checkbox],.pk input[type=radio]{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.pk .box{width:18px;height:18px;border:1.5px solid var(--card-border);border-radius:4px;background:var(--white);position:relative;transition:background .12s,border-color .12s}
+.pk.radio .box{border-radius:999px}
+.pk:has(input:checked) .box{background:var(--purple);border-color:var(--purple)}
+.pk:has(input:checked) .box::after{content:"";position:absolute;left:5px;top:2px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.pk.radio:has(input:checked) .box::after{left:5px;top:5px;width:6px;height:6px;border:0;border-radius:999px;background:#fff;transform:none}
+.pk input:focus-visible~.box{outline:2px solid var(--purple);outline-offset:2px}
+.pk .nm{font-weight:600}
+.pk .inc{font-size:12.5px;line-height:17px;color:var(--muted);margin-top:1px}
+.pk .pr{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;font-weight:600}
+.pk .pr small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.pk .ov{display:none;grid-column:2/4;position:relative;z-index:1;align-items:center;gap:8px;font-size:13px;color:var(--icon);margin-top:2px}
+.pk:has(input:checked) .ov{display:flex;flex-wrap:wrap}
+.pk .ov .lab{font-size:12px;font-weight:600;color:var(--purple)}
+.pk .ov input[type=text]{position:static;opacity:1;width:96px;height:32px;padding:0 8px;border:1px solid var(--card-border);border-radius:var(--r-sm);font-variant-numeric:tabular-nums;background:var(--white);font-weight:600;color:var(--ink)}
+.pk .ov input[type=text]:focus{outline:none;border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
+.pk .ov .sep{flex:1 0 100%;height:0}.pk .ov textarea{flex:1 0 100%;position:static;opacity:1;min-height:44px;padding:8px 10px;border:1px solid var(--card-border);border-radius:var(--r-sm);font:inherit;font-size:13px;line-height:18px;color:var(--ink);background:var(--white);resize:vertical}.pk .ov textarea:focus{outline:none;border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
+.pk .ov .reset{background:none;border:0;color:var(--purple);cursor:pointer;font-size:12px;padding:0;text-decoration:underline}
+/* plan rows */
+.seg{display:flex;flex-direction:column;gap:8px}
+.seg{gap:10px}
+.seg label{position:relative;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .12s,background .12s}
+.seg label>span:nth-child(3){display:flex;flex-direction:column;gap:2px}
+.seg label:hover{background:var(--input-hover)}
+.seg input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.seg label:has(input:checked){border-color:var(--purple);background:var(--purple-light);box-shadow:0 0 0 1px var(--purple) inset}
+.seg .box{width:18px;height:18px;border:1.5px solid var(--card-border);border-radius:999px;background:var(--white);position:relative}
+.seg label:has(input:checked) .box{border-color:var(--purple);background:var(--purple)}
+.seg label:has(input:checked) .box::after{content:"";position:absolute;left:5px;top:5px;width:6px;height:6px;border-radius:999px;background:#fff}
+.seg input:focus-visible~.box{outline:2px solid var(--purple);outline-offset:2px}
+.seg .nm{font-weight:600;display:block}.seg .ds{font-size:12.5px;color:var(--muted);line-height:17px;display:block}
+.seg .amt{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;text-align:right}.seg .amt small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.talk{margin-top:12px;padding:14px 16px 14px 18px;border-radius:10px;background:var(--bg);border-left:3px solid var(--purple)}.talk-l{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--purple)}.talk-q{margin-top:4px;font-size:15px;line-height:22px;font-style:italic;color:var(--ink)}.talk-s{margin-top:6px;font-size:12.5px;line-height:18px;color:var(--muted)}
+.plan-note{margin-top:10px;font-size:13px;line-height:19px;color:var(--icon)}.plan-note b{color:var(--ink);font-weight:600}
+/* schedule */
+.sched{margin-top:12px;display:none}.sched.on{display:block}
+.sched table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.sched th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:0 8px 8px 0}
+.sched td{padding:4px 8px 4px 0;vertical-align:middle}
+.sched input{height:38px;padding:0 10px;border:1px solid var(--border);border-radius:var(--r-md);width:100%}
+.sched input:focus{outline:none;border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
+.sched .amt{text-align:right;white-space:nowrap;color:var(--icon)}
+.sched .rm{background:none;border:0;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:6px}.sched .rm:hover{color:var(--red)}
+.sched-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:13px}
+.sched-foot .tot.bad{color:var(--red);font-weight:600}.sched-foot .tot.ok{color:var(--green-dark);font-weight:600}
+.btn-sm{height:34px;padding:0 12px;border:1px solid var(--card-border);background:var(--white);border-radius:var(--r-md);cursor:pointer;font-weight:600;font-size:13px}.btn-sm:hover{background:var(--input-hover)}
+/* fee + discount */
+.row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.row .t{font-weight:600}.row .d{font-size:13px;color:var(--muted);line-height:18px}
+.switch{position:relative;width:42px;height:24px;flex:0 0 auto}
+.switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:var(--card-border);transition:background .15s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:999px;background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.switch input:checked+span{background:var(--purple)}.switch input:checked+span::after{transform:translateX(18px)}
+.switch input:focus-visible+span{outline:2px solid var(--purple);outline-offset:2px}
+.money-in{display:inline-flex;align-items:center;gap:4px;height:40px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--white);color:var(--muted);font-variant-numeric:tabular-nums}
+.money-in input{border:0;outline:none;width:90px;height:100%;background:transparent;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.money-in:focus-within{border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
+.stack{display:flex;flex-direction:column;gap:10px}
+.stack .row{padding:14px 16px;border:1px solid var(--border);border-radius:10px}
+.disc{display:grid;grid-template-columns:130px 1fr;gap:10px;max-width:360px}
+.disc select{height:40px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--white);width:100%}
+.disc select:focus{outline:none;border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
+.disc .money-in{width:100%}.disc .money-in input{width:100%}
+/* summary */
+.summary{position:sticky;top:20px}
+.summary .pad{padding:26px 24px 22px}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--purple);margin-bottom:4px}
+.summary h2{font-size:20px;line-height:26px;font-weight:700;margin:0}
+.summary .for{font-size:13px;color:var(--muted);margin-top:4px;min-height:18px}.chosen{height:auto;padding:10px 16px;align-items:flex-start}.chosen b{display:block;font-size:15px}.chosen .em{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.lines{margin-top:16px;display:flex;flex-direction:column;gap:12px;font-variant-numeric:tabular-nums}
+.line{display:flex;justify-content:space-between;gap:12px;font-size:14px;line-height:20px}
+.line .l{display:flex;flex-direction:column}.line small{color:var(--muted);font-size:12px}
+.line .v{white-space:nowrap;font-weight:600}.line.disc .v{color:var(--green-dark)}
+.empty{color:var(--muted);font-size:13px;padding:8px 0 4px}
+.hr{height:1px;background:var(--border);margin:16px 0 14px}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.total .lab{font-size:13px;color:var(--muted)}.total .num{font-size:24px;line-height:30px;font-weight:700;font-variant-numeric:tabular-nums}
+.today{margin-top:14px;padding:16px 18px;border-radius:10px;background:var(--purple-light);border:1px solid #E9D3FF}
+.today .lab{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--purple)}
+.today .num{font-size:26px;line-height:32px;font-weight:700;color:var(--purple);font-variant-numeric:tabular-nums;margin-top:2px}
+.today .sub2{font-size:12px;color:var(--icon);margin-top:2px}
+.renew{margin-top:14px;display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:18px;color:var(--icon);padding:12px 14px;border:1px solid var(--border);border-radius:10px}
+.renew .dot{flex:0 0 auto;width:7px;height:7px;border-radius:999px;background:var(--green);margin-top:6px}.renew b{color:var(--ink);font-weight:600}
+.cta{margin-top:18px;width:100%;height:48px;border:0;border-radius:var(--r-md);background:var(--purple);color:#fff;font-weight:600;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s,transform .1s}
+.cta:hover{background:var(--purple-2)}.cta:active{transform:translateY(1px)}
+.cta:disabled{background:var(--card-border);cursor:not-allowed}
+.cta:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.pv-btn{margin-top:8px;width:100%;height:42px;border:1px solid var(--card-border);background:var(--white);border-radius:var(--r-md);font-weight:600;cursor:pointer;font-size:14px}
+.pv-btn:hover{background:var(--input-hover)}
+.sharebox{margin-top:12px;padding:14px 16px;border:1px solid var(--border);border-radius:10px}.share-row{display:flex;gap:8px;align-items:center}.share-row code{flex:1;font:600 13px/20px var(--font);padding:8px 10px;background:var(--bg);border-radius:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.share-sent{margin-top:8px;font-size:12.5px;color:var(--muted)}.share-sent b{color:var(--ink);font-weight:600}.share-sent .link{padding:0 2px;font-size:12.5px}.pv-btn:disabled{color:var(--muted);cursor:not-allowed}
+.why{margin-top:10px;font-size:12px;color:var(--muted);text-align:center;min-height:16px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:var(--r-md);font-size:14px;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+/* customer preview */
+.modal{position:fixed;inset:0;background:rgba(30,13,71,.55);display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;z-index:20}
+.modal[hidden]{display:none}
+.doc{width:100%;max-width:760px;background:var(--white);border-radius:var(--r-lg);box-shadow:0 24px 64px rgba(30,13,71,.3);overflow:hidden}
+.doc-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:var(--bg);border-bottom:1px solid var(--border);font-size:13px;color:var(--muted)}
+.doc-bar b{color:var(--ink);font-weight:600}
+.doc-bar button{border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:var(--icon)}
+.doc-body{padding:36px 44px 40px}
+@media (max-width:600px){.doc-body{padding:24px 18px}}
+.doc-body img.logo{height:30px;width:auto;display:block;margin-bottom:22px}
+.doc-body h1{font-size:26px;line-height:35px;font-weight:700;margin:0 0 12px;text-wrap:balance}
+.doc-body h2{font-size:18px;line-height:24px;font-weight:700;margin:28px 0 10px}
+.doc-body p{margin:0 0 10px;line-height:22px}
+.doc-body .meta{display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;font-size:14px;color:var(--icon);margin:16px 0 6px}
+.doc-body .meta b{color:var(--ink);font-weight:600;display:block}
+.dt{width:100%;border-collapse:collapse;margin-top:8px;font-variant-numeric:tabular-nums}
+.dt th{font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 8px 8px 0;border-bottom:1px solid var(--card-border)}
+.dt th.r,.dt td.r{text-align:right}
+.dt td{padding:12px 8px 12px 0;border-bottom:1px solid var(--border);vertical-align:top}
+.dt td .n{font-weight:600}.dt td .d{font-size:13px;color:var(--muted);line-height:18px;margin-top:2px}
+.dt td img{width:28px;height:28px;vertical-align:middle;margin-right:10px}
+.dt .rep{font-size:12px;color:var(--muted);display:block}
+.dt tfoot td{border:0;padding:8px 8px 4px 0}
+.dt tfoot .tot td{font-weight:700;font-size:18px;padding-top:12px}
+.dt .waived{color:var(--green-dark)}
+.pay-box{margin-top:18px;padding:16px 18px;border-radius:var(--r-md);background:var(--purple-light);display:grid;gap:6px;font-size:15px}
+.pay-box .big{display:flex;justify-content:space-between;font-weight:700;font-size:18px;color:var(--purple)}
+.pay-box .row2{display:flex;justify-content:space-between;color:var(--icon);font-size:14px}
+.terms{margin:0;padding-left:20px;line-height:21px;font-size:14px;color:var(--icon)}
+.terms li{margin-bottom:6px}.terms b{color:var(--ink)}
+.confirm{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:20px;margin-top:8px}
+.confirm .box{flex:0 0 auto;width:18px;height:18px;border:1.5px solid var(--card-border);border-radius:4px;margin-top:1px}
+.sig{margin-top:22px;display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.sig div{border-bottom:1.5px solid var(--card-border);height:44px;position:relative}
+.sig div::after{content:attr(data-l);position:absolute;top:48px;left:0;font-size:12px;color:var(--muted)}
+.doc-cta{margin-top:56px;width:100%;height:50px;border:0;border-radius:var(--r-md);background:linear-gradient(var(--purple),var(--purple-2));color:#fff;font-weight:600;font-size:16px;cursor:default}
+.doc-foot{margin-top:12px;text-align:center;font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div class="wrap">
+  <div class="top">
+    <img src="https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c69030ace6166590c7d808e_1200_80.webp" alt="RocketPlan">
+    <div class="who">Sales rep <b id="rep-name"></b></div>
+  </div>
+  <div class="title"><div><h1>New Deal</h1><p>Build the package, send the order form, done.</p></div><span class="status" id="status-pill">Unsent draft</span><span id="deal-code" hidden></span></div>
+
+  <div class="grid">
+    <div class="card" id="form">
+<section class="sec">
+        <div class="lead"><span class="num" id="st1">01</span><div><h2>Client</h2><p class="sub">Who is this deal for?</p></div></div>
+        <div>
+          <span class="lbl">Contact</span>
+          <div class="combo" id="combo">
+            <input class="input" id="client-search" type="text" placeholder="Search by name, company or email" autocomplete="off" aria-label="Client">
+            <div class="menu" id="client-menu" hidden></div>
+          </div>
+          <div class="chosen" id="client-chosen" hidden><span><b id="cc-name"></b><span class="em" id="cc-sub"></span></span><button class="link" id="cc-change" type="button">Change</button></div>
+        </div>
+      </section>
+<section class="sec">
+        <div class="lead"><span class="num" id="st2">02</span><div><h2>Packages</h2><p class="sub">One RocketPlan tier, sized by users, plus any add-ons. Prices can be overwritten.</p></div></div>
+        <div>
+          <span class="lbl">RocketPlan tier</span>
+          <div class="list" id="tiers"></div>
+          <span class="lbl">Other products <span style="font-weight:400;text-transform:none;letter-spacing:0">· sold on their own or together</span></span>
+          <div class="list" id="addons"></div>
+        </div>
+      </section>
+<section class="sec">
+        <div class="lead"><span class="num" id="st4">03</span><div><h2>Setup fee</h2><p class="sub">Always on the order, so the client sees its value.</p></div></div>
+        <div class="stack">
+          <div class="row"><div><div class="t">Onboarding, account setup and training</div><div class="d" id="fee-sub">One-time, charged with the first payment.</div></div><span class="money-in">$<input id="fee-amt" type="text" inputmode="numeric" value="1,500" aria-label="Setup fee amount"></span></div>
+          <div class="row"><div><div class="t">Waive the setup fee</div><div class="d">Keeps the line on the invoice and adds a matching credit.</div></div><label class="switch"><input type="checkbox" id="fee-waive"><span></span></label></div>
+        </div>
+      </section>
+<section class="sec">
+        <div class="lead"><span class="num" id="st3">04</span><div><h2>Plan</h2><p class="sub">How will the client pay the 12-month term?</p></div></div>
+        <div>
+          <div class="seg" id="plans">
+            <label><input type="radio" name="plan" value="full" checked><span class="box"></span><span><span class="nm">Paid in full</span><span class="ds">One payment at signing. Renews yearly.</span></span><span class="amt" id="amt-full"></span></label>
+            <label><input type="radio" name="plan" value="split"><span class="box"></span><span><span class="nm">Split payments</span><span class="ds">Annual price on dates you choose.</span></span><span class="amt" id="amt-split"></span></label>
+            <label><input type="radio" name="plan" value="quarterly"><span class="box"></span><span><span class="nm">Quarterly payments</span><span class="ds">4 payments, every 3 months.</span></span><span class="amt" id="amt-quarterly"></span></label>
+            <label><input type="radio" name="plan" value="monthly"><span class="box"></span><span><span class="nm">Monthly payments</span><span class="ds">12 payments, every month.</span></span><span class="amt" id="amt-monthly"></span></label>
+          </div>
+          <div class="talk" id="talk" hidden><div class="talk-l">Say this</div><div class="talk-q" id="talk-q"></div><div class="talk-s" id="talk-s"></div></div>
+          <div class="plan-note" id="plan-note"></div>
+          <div class="sched" id="sched">
+            <table><thead><tr><th style="width:100px">Share</th><th>Due</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody id="sched-rows"></tbody></table>
+            <div class="sched-foot"><span class="tot" id="sched-tot"></span><button class="btn-sm" type="button" id="sched-add">Add a payment</button></div>
+          </div>
+        </div>
+      </section>
+<section class="sec">
+        <div class="lead"><span class="num" id="st5">05</span><div><h2>Discount</h2><p class="sub">Optional. First year only; renewal is at list price.</p></div></div>
+        <div class="disc">
+          <select id="disc-type" aria-label="Discount type"><option value="none">None</option><option value="pct">Percent</option><option value="amt">Amount</option></select>
+          <span class="money-in" id="disc-wrap"><span id="disc-sym">$</span><input id="disc-val" type="text" inputmode="numeric" placeholder="0" aria-label="Discount value" disabled></span>
+        </div>
+      </section>
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <aside class="card summary">
+      <div class="pad">
+        <div class="eyebrow">Deal overview</div>
+        <h2>Summary</h2>
+        <div class="for" id="sum-for">No client selected</div>
+        <div class="lines" id="sum-lines"><div class="empty">Pick a RocketPlan tier or an add-on to see the numbers.</div></div>
+        <div class="hr"></div>
+        <div class="total"><span class="lab" id="tot-lab">First-year total</span><span class="num" id="tot-num">$0</span></div>
+        <div class="today"><div class="lab" id="today-lab">Customer pays today</div><div class="num" id="today-num">$0</div><div class="sub2" id="today-sub">Nothing is charged until the client signs.</div></div>
+        <div class="renew" id="renew" hidden><span class="dot"></span><span id="renew-txt"></span></div>
+        <button class="cta" id="send" type="button" disabled>Send order form <span aria-hidden="true">→</span></button>
+        <button class="pv-btn" id="preview" type="button" disabled>Preview what the client receives</button>
+        <button class="pv-btn" id="sharelink" type="button" disabled>Send live link to the client</button>
+        <div class="why" id="share-why">The client follows the package on their own screen while you build it. The same link becomes the sign-and-pay page when you send the order form.</div>
+        <div class="sharebox" id="sharebox" hidden>
+          <div class="lbl">Client's live link</div>
+          <div class="share-row"><code id="share-url">deal.rocketplantech.com/d/K7M2QX</code><button class="btn-sm" type="button" id="share-copy">Copy</button></div>
+          <div class="share-sent">Sent by email and SMS to <b id="share-to"></b> &middot; <button class="link" type="button" id="share-open">see what they see</button></div>
+        </div>
+        <div class="why" id="why">Choose a client and a package to continue.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-label="Client preview">
+  <div class="doc">
+    <div class="doc-bar"><span>What <b id="pv-who">the client</b> sees when they open the link</span><button type="button" id="pv-close" aria-label="Close">×</button></div>
+    <div class="doc-body" id="pv-body"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+// ---------- pricing (pure) ----------
+const Q=new URLSearchParams(location.search);const REP=Q.get('rep')||Q.get('name')||'RocketPlan';const REP_EMAIL=Q.get('email')||'';const KEY=Q.get('k')||'';const API='https://irrxupzubigjytxeeapu.supabase.co/functions/v1/new-deal';let PACKAGES=[];
+const api=(p,o={})=>fetch(API+p,{...o,headers:{'x-app-key':KEY,'content-type':'application/json',...(o.headers||{})}}).then(async r=>{const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j;});
+let CONTACTS=[];
+const money=(n)=>'$'+Math.round(n).toLocaleString('en-US');
+const money2=(n)=>Math.abs(n-Math.round(n))<0.005?money(n):'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const num=(v)=>+String(v).replace(/[^0-9.]/g,'')||0;
+const fmtIn=(el)=>{el.value=Math.round(num(el.value)).toLocaleString('en-US');};
+const monthly=(annual)=>Math.round(annual/10);
+const quarterly=(annual)=>monthly(annual)*3;
+// annual price actually used for a package = override when set, else list
+const usedAnnual=(state,p)=>state.override[p.id]!=null?state.override[p.id]:p.annual;
+const usedDesc=(state,p)=>(state.desc[p.id]??p.inc).trim();
+function price(state){
+  const sel=PACKAGES.filter(p=>state.packages.has(p.id));
+  const annualList=sel.reduce((a,p)=>a+p.annual,0);              // renewal basis (catalog)
+  const annualUsed=sel.reduce((a,p)=>a+usedAnnual(state,p),0);   // this order
+  const perMonth=sel.reduce((a,p)=>a+monthly(usedAnnual(state,p)),0);
+  const perQuarter=sel.reduce((a,p)=>a+quarterly(usedAnnual(state,p)),0);
+  const base=state.plan==='monthly'?perMonth*12:state.plan==='quarterly'?perQuarter*4:annualUsed;
+  const fee=sel.length?state.fee:0;
+  const gross=base+fee;
+  const waive=state.waive?fee:0;
+  let disc=0;
+  if(state.discType==='pct')disc=(gross-waive)*Math.min(100,Math.max(0,state.discVal))/100;
+  if(state.discType==='amt')disc=Math.min(gross-waive,Math.max(0,state.discVal));
+  const total=gross-waive-disc;
+  const ratio=gross?total/gross:1;  // share of the gross the client actually pays
+  let today=total, schedule=null;
+  if(state.plan==='monthly'){const m=perMonth*ratio;today=(perMonth+fee)*ratio;schedule={per:m,count:12,every:'month'};}
+  if(state.plan==='quarterly'){const q=perQuarter*ratio;today=(perQuarter+fee)*ratio;schedule={per:q,count:4,every:'3 months'};}
+  if(state.plan==='split'){const sum=state.split.reduce((a,r)=>a+(+r.pct||0),0);schedule={rows:state.split.map(r=>({...r,amount:total*(+r.pct||0)/100})),sum};today=total*(+state.split[0]?.pct||0)/100;}
+  return {sel,annualList,annualUsed,perMonth,perQuarter,base,fee,waive,gross,disc,total,today,schedule};
+}
+function addMonths(d,n){const x=new Date(d);x.setMonth(x.getMonth()+n);return x;}
+const fmtDate=(d)=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const iso=(d)=>d.toISOString().slice(0,10);
+
+// ---------- state ----------
+const state={client:null,packages:new Set(),override:{},desc:{},plan:'full',fee:1500,waive:false,discType:'none',discVal:0,
+  split:[{pct:50,date:iso(new Date())},{pct:50,date:iso(addMonths(new Date(),1))}]};
+
+function esc(t){return String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+// ---------- client combobox ----------
+const $=(s)=>document.querySelector(s);
+const search=$('#client-search'),menu=$('#client-menu'),chosen=$('#client-chosen');
+let hi=0;
+let searchTimer=null,searching=false;
+function renderMenu(){const q=search.value.trim();
+  if(q.length<2){menu.innerHTML='<div class="none">Type at least two letters.</div>';menu.hidden=false;return;}
+  menu.innerHTML=CONTACTS.length?CONTACTS.map((c,i)=>`<button type="button" data-id="${c.id}" class="${i===hi?'active':''}"><span>${esc(c.name)} <small>· ${esc(c.company||'')}</small></span><small>${esc(c.email||'no email')}${c.phone?'':' · no phone'}</small></button>`).join(''):(searching?'<div class="none">Searching…</div>':`<div class="none">No client matching "${esc(q)}". Create them in GHL Contacts first.</div>`);
+  menu.hidden=false;}
+search.addEventListener('input',()=>{hi=0;clearTimeout(searchTimer);const q=search.value.trim();if(q.length<2){CONTACTS=[];renderMenu();return;}searching=true;renderMenu();searchTimer=setTimeout(async()=>{try{const r=await api('/api/contacts?q='+encodeURIComponent(q));CONTACTS=r.contacts||[];}catch(e){CONTACTS=[];}searching=false;renderMenu();},250);});
+search.addEventListener('focus',renderMenu);
+search.addEventListener('keydown',(e)=>{const n=menu.querySelectorAll('button').length;if(e.key==='ArrowDown'){hi=Math.min(n-1,hi+1);renderMenu();e.preventDefault();}if(e.key==='ArrowUp'){hi=Math.max(0,hi-1);renderMenu();e.preventDefault();}if(e.key==='Enter'){const b=menu.querySelectorAll('button')[hi];if(b)pick(b.dataset.id);e.preventDefault();}if(e.key==='Escape')menu.hidden=true;});
+menu.addEventListener('mousedown',(e)=>{const b=e.target.closest('button');if(b){pick(b.dataset.id);e.preventDefault();}});
+document.addEventListener('click',(e)=>{if(!e.target.closest('#combo'))menu.hidden=true;});
+function pick(id){state.client=CONTACTS.find(c=>c.id===id);menu.hidden=true;$('#combo').hidden=true;chosen.hidden=false;$('#cc-name').textContent=state.client.name+' · '+state.client.company;$('#cc-sub').textContent=state.client.email;render();}
+$('#cc-change').addEventListener('click',()=>{state.client=null;chosen.hidden=true;$('#combo').hidden=false;$('#cc-sub').textContent='';search.value='';search.focus();render();});
+
+// ---------- packages: one RocketPlan tier (radio) + add-ons (checkboxes) ----------
+const card=(p,type)=>`<label class="pk ${type==='radio'?'radio':''}"><input type="${type}" name="${type==='radio'?'tier':'addon-'+p.id}" value="${p.id}"><span class="box"></span><span><span class="nm">${p.name}</span><div class="inc">${p.inc}</div></span><span class="pr">${money(p.annual)}<small>/ year · ${money(monthly(p.annual))} / mo</small></span><span class="ov"><span class="lab">Deal price</span>$<input type="text" inputmode="numeric" data-ov="${p.id}" value="${p.annual.toLocaleString('en-US')}" aria-label="${p.name} annual price"><span>/ year</span><button type="button" class="reset" data-reset="${p.id}" hidden>back to list</button><span class="sep"></span><span class="lab">Description on the agreement</span><textarea rows="2" data-desc="${p.id}" aria-label="${p.name} description">${p.inc}</textarea></span></label>`;
+function onPkChange(e){const t=e.target;
+  if(t.dataset.desc!==undefined){state.desc[t.dataset.desc]=t.value;render();return;}
+  if(t.dataset.ov!==undefined){const id=t.dataset.ov,v=num(t.value);state.override[id]=v;const p=PACKAGES.find(x=>x.id===id);t.closest('.ov').querySelector('.reset').hidden=(v===p.annual);if(e.type==='change')fmtIn(t);render();return;}
+  if(t.type==='radio'){PACKAGES.filter(p=>p.family==='rp').forEach(p=>state.packages.delete(p.id));state.packages.add(t.value);}
+  else{t.checked?state.packages.add(t.value):state.packages.delete(t.value);}
+  feeHint();render();}
+['#tiers','#addons'].forEach(sel=>{$(sel).addEventListener('change',onPkChange);$(sel).addEventListener('input',(e)=>{if(e.target.dataset.ov!==undefined||e.target.dataset.desc!==undefined)onPkChange(e);});
+  $(sel).addEventListener('click',(e)=>{const b=e.target.closest('[data-reset]');if(!b)return;e.preventDefault();const p=PACKAGES.find(x=>x.id===b.dataset.reset);state.override[p.id]=null;const inp=b.parentElement.querySelector('input');inp.value=p.annual.toLocaleString('en-US');b.hidden=true;render();});
+  $(sel).addEventListener('click',(e)=>{if(e.target.closest('.ov'))e.stopPropagation();});});
+// allow un-picking the tier by clicking the selected radio again
+$('#tiers').addEventListener('click',(e)=>{const r=e.target.closest('label')?.querySelector('input[type=radio]');if(r&&r.checked&&state.packages.has(r.value)&&e.target===r){r.checked=false;state.packages.delete(r.value);feeHint();render();}});
+function feeHint(){const sel=PACKAGES.filter(p=>state.packages.has(p.id));const rp=sel.some(p=>p.family==='rp'),crm=sel.some(p=>p.family==='crm');
+  $('#fee-sub').textContent=rp&&crm?'RocketPlan and RocketCRM together: consider $2,500 for both setups.':'One-time, charged with the first payment.';}
+
+// ---------- plan / fee / discount ----------
+$('#plans').addEventListener('change',(e)=>{state.plan=e.target.value;render();});
+$('#fee-amt').addEventListener('input',(e)=>{state.fee=num(e.target.value);render();});$('#fee-amt').addEventListener('change',(e)=>fmtIn(e.target));
+$('#fee-waive').addEventListener('change',(e)=>{state.waive=e.target.checked;render();});
+$('#disc-type').addEventListener('change',(e)=>{state.discType=e.target.value;$('#disc-val').disabled=state.discType==='none';$('#disc-sym').textContent=state.discType==='pct'?'%':'$';if(state.discType==='none'){state.discVal=0;$('#disc-val').value='';}render();});
+$('#disc-val').addEventListener('input',(e)=>{state.discVal=num(e.target.value);render();});$('#disc-val').addEventListener('change',(e)=>{if(state.discType==='amt')fmtIn(e.target);});
+
+// ---------- split schedule ----------
+function renderSched(){const p=price(state);const rows=$('#sched-rows');
+  rows.innerHTML=state.split.map((r,i)=>`<tr><td><input type="number" min="1" max="100" value="${r.pct}" data-i="${i}" data-k="pct" aria-label="Share ${i+1}"></td><td><input type="date" value="${r.date}" data-i="${i}" data-k="date" aria-label="Due date ${i+1}" ${i===0?'readonly':''}></td><td class="amt">${p.schedule?money2(p.schedule.rows[i].amount):''}</td><td>${state.split.length>1?`<button class="rm" type="button" data-rm="${i}" aria-label="Remove payment">×</button>`:''}</td></tr>`).join('');
+  const sum=state.split.reduce((a,r)=>a+(+r.pct||0),0);const t=$('#sched-tot');t.textContent=sum===100?'Adds up to 100%':`Adds up to ${sum}% (needs 100%)`;t.className='tot '+(sum===100?'ok':'bad');}
+$('#sched-rows').addEventListener('input',(e)=>{const i=+e.target.dataset.i,k=e.target.dataset.k;if(k==='pct')state.split[i].pct=+e.target.value||0;else state.split[i].date=e.target.value;render();});
+$('#sched-rows').addEventListener('click',(e)=>{const b=e.target.closest('[data-rm]');if(!b)return;state.split.splice(+b.dataset.rm,1);rebalance();render();});
+$('#sched-add').addEventListener('click',()=>{const last=state.split[state.split.length-1];state.split.push({pct:0,date:iso(addMonths(new Date(last.date),1))});rebalance();render();});
+function rebalance(){const n=state.split.length;const each=Math.floor(100/n);state.split.forEach((r,i)=>r.pct=i===n-1?100-each*(n-1):each);}
+
+// ---------- render ----------
+function render(){
+  const p=price(state);const has=p.sel.length>0;
+  $('#st1').className='num'+(state.client?' done':'');$('#st2').className='num'+(has?' done':'');
+  $('#amt-full').innerHTML=has?`${money(p.annualUsed)}<small>at signing</small>`:'';$('#amt-split').innerHTML=has?`${money(p.annualUsed)}<small>your dates</small>`:'';$('#amt-quarterly').innerHTML=has?`${money(p.perQuarter)}<small>× 4</small>`:'';$('#amt-monthly').innerHTML=has?`${money(p.perMonth)}<small>× 12</small>`:'';
+  $('#today-sub').textContent=state.plan==='monthly'?'Month 1 plus setup fee, at signing.':state.plan==='quarterly'?'Quarter 1 plus setup fee, at signing.':state.plan==='split'?'First share, at signing.':'Full first year, at signing.';
+  $('#sched').classList.toggle('on',state.plan==='split');if(state.plan==='split')renderSched();
+  const notes={full:'<b>One yearly recurring invoice.</b> The client pays the annual amount today; it renews automatically each year.',
+    split:'<b>Custom dates at the annual price.</b> The first share is charged when they sign; the rest is charged automatically on the dates below. Renews at the annual list price in 12 months.',
+    quarterly:'<b>4 quarterly payments, then annual.</b> Three months of the monthly rate per payment. At month 12 the subscription renews at the annual list price, paid in full.',
+    monthly:'<b>12 monthly payments, then annual.</b> Annual ÷ 10 per month. At month 12 the subscription renews at the annual list price, paid in full.'};
+  $('#plan-note').innerHTML=notes[state.plan];
+  const talk=$('#talk');talk.hidden=!has;
+  if(has){const q=money(p.perQuarter),m=money(p.perMonth);
+    const t={full:[`“We can also finance this over the year at no interest. Would ${m} a month or ${q} a quarter work better for your cash flow?”`,`Use this if the client hesitates on the price. Same 12-month term, same price, no interest. If they say yes, pick Quarterly or Monthly above.`],
+      split:[`“No interest on this. Let's put the first payment today and spread the rest on dates that suit you.”`,`Set the shares and dates below. The first share is charged when they sign.`],
+      quarterly:[`“That's four payments of ${q}, no interest, and it renews at the annual rate next year.”`,`First quarter plus setup fee is charged at signing; the next three are automatic.`],
+      monthly:[`“That's ${m} a month, no interest, for 12 months. Next year it renews at the annual rate.”`,`Month one plus setup fee is charged at signing; the other 11 are automatic.`]}[state.plan];
+    $('#talk-q').textContent=t[0];$('#talk-s').textContent=t[1];}
+  $('#sum-for').textContent=state.client?`For ${state.client.name}, ${state.client.company}`:'No client selected';
+  const lines=$('#sum-lines');
+  if(!has){lines.innerHTML='<div class="empty">Pick a RocketPlan tier or an add-on to see the numbers.</div>';}
+  else{
+    let h=p.sel.map(pk=>{const a=usedAnnual(state,pk);const ov=a!==pk.annual?` · list ${money(pk.annual)}`:'';
+      const sub=state.plan==='monthly'?`${money(monthly(a))} / month × 12${ov}`:state.plan==='quarterly'?`${money(quarterly(a))} / quarter × 4${ov}`:`${money(a)} / year${ov}`;
+      const v=state.plan==='monthly'?monthly(a)*12:state.plan==='quarterly'?quarterly(a)*4:a;
+      return `<div class="line"><span class="l">${pk.name}<small>${sub}</small></span><span class="v">${money(v)}</span></div>`;}).join('');
+    h+=`<div class="line"><span class="l">Setup fee<small>one-time${state.waive?' · waived':''}</small></span><span class="v">${money(p.fee)}</span></div>`;
+    if(p.waive)h+=`<div class="line disc"><span class="l">Setup fee waived</span><span class="v">−${money2(p.waive)}</span></div>`;
+    if(p.disc)h+=`<div class="line disc"><span class="l">Discount<small>first year only</small></span><span class="v">−${money2(p.disc)}</span></div>`;
+    lines.innerHTML=h;
+  }
+  $('#tot-lab').textContent=state.plan==='monthly'?'First-year total (12 payments)':state.plan==='quarterly'?'First-year total (4 payments)':'First-year total';
+  $('#tot-num').textContent=has?money2(p.total):'$0';
+  $('#today-lab').textContent='Customer pays today';
+  $('#today-num').textContent=has?money2(p.today):'$0';
+  const r=$('#renew');r.hidden=!has;
+  if(has){const d=addMonths(new Date(state.plan==='split'?state.split[0].date:new Date()),12);$('#renew-txt').innerHTML=`Renews <b>${fmtDate(d)}</b> at <b>${money(p.annualList)}/year</b> (list price), charged to the saved card. Cancel any time before then.`;}
+  let why='';
+  if(!state.client)why='Choose a client to continue.';
+  else if(!has)why='Pick a RocketPlan tier or an add-on.';
+  else if(state.plan==='split'&&p.schedule.sum!==100)why='The split must add up to 100%.';
+  $('#send').disabled=!!why;$('#preview').disabled=!has;if($('#sharebox').hidden)$('#sharelink').disabled=!state.client;persist();$('#why').textContent=why||'Sends the order form by email and SMS. Nothing is charged until the client signs.';
+}
+// ---------- save to server (debounced) ----------
+function snapshot(){return {packages:[...state.packages],override:state.override,desc:state.desc,plan:state.plan,fee:state.fee,waive:state.waive,discType:state.discType,discVal:state.discVal,split:state.split};}
+let dealCode=null,saveTimer=null,dirty=false,locked=false;
+function persist(){if(locked)return;dirty=true;clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,600);}
+async function saveNow(){if(!dirty||locked)return;dirty=false;try{const r=await api('/api/deals/'+(dealCode||'new'),{method:'PUT',body:JSON.stringify({deal:snapshot(),contact:state.client,rep:REP,email:REP_EMAIL})});dealCode=r.code;$('#deal-code').textContent=dealCode;}catch(e){toast('Could not save: '+e.message);}}
+function toast(t,ms=3200){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),ms);}
+// ---------- live link + send ----------
+$('#sharelink').addEventListener('click',async()=>{dirty=true;await saveNow();if(!dealCode)return;$('#sharelink').disabled=true;$('#sharelink').textContent='Sending…';
+  try{const r=await api('/api/deals/'+dealCode+'/link',{method:'POST'});$('#share-url').textContent=r.link.replace(/^https?:\/\//,'');$('#share-url').dataset.href=r.link;$('#sharebox').hidden=false;$('#share-to').textContent=(state.client?state.client.email:'')+(r.sent.includes('SMS')?' and by SMS':'');$('#sharelink').textContent=r.sent.length?'Live link sent':'Live link ready (copy it)';toast(r.sent.length?'Live link sent to the client.':'Could not send from GHL; copy the link and send it yourself.');}
+  catch(e){$('#sharelink').disabled=false;$('#sharelink').textContent='Send live link to the client';toast(e.message);}});
+$('#share-copy').addEventListener('click',()=>{const u=$('#share-url').dataset.href||('https://'+$('#share-url').textContent);navigator.clipboard?.writeText(u).then(()=>{$('#share-copy').textContent='Copied';setTimeout(()=>$('#share-copy').textContent='Copy',1500);}).catch(()=>{});});
+$('#share-open').addEventListener('click',()=>{const u=$('#share-url').dataset.href;if(u)window.open(u,'_blank');});
+$('#send').addEventListener('click',async()=>{if(!state.client)return;$('#send').disabled=true;$('#send').textContent='Sending…';dirty=true;await saveNow();
+  try{const r=await api('/api/deals/'+dealCode+'/send',{method:'POST'});locked=true;$('#status-pill').textContent='Sent · '+dealCode;$('#send').textContent='Order form sent';
+    $('#why').innerHTML=`Invoice <a href="${r.invoiceUrl}" target="_blank" rel="noopener">${r.invoiceUrl.replace(/^https?:\/\//,'')}</a> created.${r.docErr?' The order form could not be sent automatically: '+esc(r.docErr):' The client has the order form by email and SMS.'} <button class="link" type="button" id="newdeal">Start another deal</button>`;
+    $('#newdeal').addEventListener('click',()=>location.reload());document.querySelectorAll('#form input,#form select,#form textarea,#form button').forEach(el=>el.disabled=true);}
+  catch(e){$('#send').disabled=false;$('#send').innerHTML='Send order form <span aria-hidden="true">→</span>';toast(e.message,6000);}});
+
+// ---------- customer preview ----------
+
+function renderPreview(){
+  const p=price(state);const c=state.client;const today=new Date();
+  const per=state.plan==='monthly'?'month':state.plan==='quarterly'?'3 months':state.plan==='full'?'year':null;
+  const rows=p.sel.map(pk=>{const a=usedAnnual(state,pk);const unit=state.plan==='monthly'?monthly(a):state.plan==='quarterly'?quarterly(a):a;
+    return `<tr><td><img src="https://msgsndr-private.storage.googleapis.com/companyPhotos/49c30135-8b71-4e68-9941-e496becf95f9.png" alt=""><span class="n">${esc(pk.name)}</span><div class="d">${esc(usedDesc(state,pk))} 12-month subscription, renews automatically each year at ${money(pk.annual)} per year.</div></td><td class="r">${money(unit)}${per?`<span class="rep">Repeats every ${per}</span>`:'<span class="rep">One time</span>'}</td><td class="r">1</td><td class="r">${money(unit)}</td></tr>`;}).join('')
+    +`<tr><td><img src="https://msgsndr-private.storage.googleapis.com/companyPhotos/49c30135-8b71-4e68-9941-e496becf95f9.png" alt=""><span class="n">Set Up Fee</span><div class="d">One-time onboarding, account setup and training.</div></td><td class="r">${money(p.fee)}<span class="rep">One time</span></td><td class="r">1</td><td class="r">${money(p.fee)}</td></tr>`;
+  const firstCharge=p.today;
+  let schedTxt='';
+  if(state.plan==='full')schedTxt=`<div class="row2"><span>Then</span><span>${money(p.annualList)} every year, starting ${fmtDate(addMonths(today,12))}</span></div>`;
+  if(state.plan==='monthly')schedTxt=`<div class="row2"><span>Then</span><span>${money2(p.schedule.per)} a month for 11 more months</span></div><div class="row2"><span>From ${fmtDate(addMonths(today,12))}</span><span>${money(p.annualList)} per year, paid in full</span></div>`;
+  if(state.plan==='quarterly')schedTxt=`<div class="row2"><span>Then</span><span>${money2(p.schedule.per)} every 3 months, 3 more times</span></div><div class="row2"><span>From ${fmtDate(addMonths(today,12))}</span><span>${money(p.annualList)} per year, paid in full</span></div>`;
+  if(state.plan==='split')schedTxt=p.schedule.rows.slice(1).map(r=>`<div class="row2"><span>${fmtDate(new Date(r.date+'T12:00:00'))}</span><span>${money2(r.amount)}</span></div>`).join('')+`<div class="row2"><span>From ${fmtDate(addMonths(new Date(state.split[0].date+'T12:00:00'),12))}</span><span>${money(p.annualList)} per year, paid in full</span></div>`;
+  $('#pv-who').textContent=c?c.name:'the client';
+  $('#pv-body').innerHTML=`
+    <img class="logo" src="https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c69030ace6166590c7d808e_1200_80.webp" alt="RocketPlan">
+    <h1>RocketPlan Order Form &amp; Subscription Agreement</h1>
+    <p>This Order Form is between RocketPlan Technologies Inc., 170-422 Richards Street, Vancouver, BC V6B 2Z4, Canada ("RocketPlan") and the customer named below ("Customer"). Prices are in US dollars and exclude applicable taxes. To complete your order: review the package, tick the three confirmations, sign, and make your first payment on the next screen.</p>
+    <div class="meta"><span><b>Customer</b>${c?esc(c.name)+', '+esc(c.company):'—'}</span><span><b>Email</b>${c?esc(c.email):'—'}</span><span><b>Prepared by</b>${esc(REP)}, RocketPlan</span><span><b>Date</b>${fmtDate(today)}</span></div>
+    <table class="dt"><thead><tr><th>Item</th><th class="r">Price</th><th class="r">Qty</th><th class="r">Subtotal</th></tr></thead><tbody>${rows}</tbody>
+    <tfoot>
+      <tr><td colspan="3" class="r">First-year subtotal${state.plan==='monthly'?' (12 payments)':state.plan==='quarterly'?' (4 payments)':''}</td><td class="r">${money2(p.gross)}</td></tr>
+      ${p.waive?`<tr class="waived"><td colspan="3" class="r">Setup fee waived</td><td class="r">−${money2(p.waive)}</td></tr>`:''}
+      ${p.disc?`<tr class="waived"><td colspan="3" class="r">Discount (first year only)</td><td class="r">−${money2(p.disc)}</td></tr>`:''}
+      <tr class="tot"><td colspan="3" class="r">First-year total</td><td class="r">${money2(p.total)}</td></tr>
+    </tfoot></table>
+    <div class="pay-box"><div class="big"><span>Pay today</span><span>${money2(firstCharge)}</span></div>${schedTxt}</div>
+    <h2>Key Terms</h2>
+    <ol class="terms">
+      <li><b>Effective date and term.</b> The subscription starts on the date of your first payment and runs for 12 months.</li>
+      <li><b>Automatic renewal.</b> At the end of each term the subscription renews for a further 12 months at RocketPlan's then-current list price for the same package, paid annually. Discounts on this Order Form apply to the first term only. RocketPlan emails you at least 30 days before each renewal charge.</li>
+      <li><b>Cancellation.</b> You may cancel at any time by written notice to RocketPlan. Cancellation stops future renewals and takes effect at the end of the current term.</li>
+      <li><b>Payment.</b> Fees are billed in advance per the schedule above. The card used for the first payment is stored securely with our payment processor and charged automatically for the remaining instalments and each renewal.</li>
+      <li><b>No refunds.</b> All fees are non-refundable, including any unused portion of a term.</li>
+      <li><b>Scope.</b> Each package includes the users, modules and usage limits shown above. Additional users, modules or usage are available at list price.</li>
+      <li><b>Governing terms.</b> RocketPlan's Terms &amp; Conditions and Privacy Policy apply. If this Order Form conflicts with them, this Order Form prevails for the commercial terms above.</li>
+    </ol>
+    <h2>Your confirmations</h2>
+    <div class="confirm"><span class="box"></span><span>I have read and agree to RocketPlan's Terms &amp; Conditions and Privacy Policy.</span></div>
+    <div class="confirm"><span class="box"></span><span>I understand this is a 12-month subscription that renews automatically at list price, that I can cancel at any time by written notice, and that cancellation takes effect at the end of the current term.</span></div>
+    <div class="confirm"><span class="box"></span><span>I understand that all fees are non-refundable and that any instalments on the payment schedule will be charged automatically to the card I use for the first payment.</span></div>
+    <div class="sig"><div data-l="Signature"></div><div data-l="Date"></div></div>
+    <button class="doc-cta" type="button">Sign and pay ${money2(firstCharge)}</button>
+    <div class="doc-foot">Secure card payment by Stripe. A copy of the signed form is emailed to ${c?esc(c.email):'the client'}.</div>`;
+  $('#modal').hidden=false;document.body.style.overflow='hidden';
+}
+$('#preview').addEventListener('click',renderPreview);
+$('#pv-close').addEventListener('click',()=>{$('#modal').hidden=true;document.body.style.overflow='';});
+$('#modal').addEventListener('click',(e)=>{if(e.target.id==='modal')$('#pv-close').click();});
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&!$('#modal').hidden)$('#pv-close').click();});
+$('#rep-name').textContent=REP;
+api('/api/catalog').then(r=>{PACKAGES=r.packages;$('#tiers').innerHTML=PACKAGES.filter(p=>p.family==='rp').map(p=>card(p,'radio')).join('');$('#addons').innerHTML=PACKAGES.filter(p=>p.family!=='rp').map(p=>card(p,'checkbox')).join('');feeHint();render();}).catch(e=>{document.body.innerHTML='<p style="font-family:sans-serif;padding:40px">'+(KEY?'Could not load the catalog: '+e.message:'This link needs the app key. Open New Deal from the GHL sidebar.')+'</p>';});
+</script>
+
+</body></html>
