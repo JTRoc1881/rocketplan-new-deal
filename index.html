@@ -398,7 +398,8 @@ function feeHint(){const sel=PACKAGES.filter(p=>state.packages.has(p.id));const 
   $('#fee-sub').textContent=rp&&crm?'RocketPlan and RocketCRM together: consider $2,500 for both setups.':'One-time, charged with the first payment.';}
 
 // ---------- plan / fee / discount ----------
-$('#plans').addEventListener('change',(e)=>{state.plan=e.target.value;render();});
+$('#plans').addEventListener('change',(e)=>{state.plan=e.target.value;render();
+  if(state.plan==='split'){const sc=$('#sched');sc.scrollIntoView({block:'nearest',behavior:'smooth'});const f=sc.querySelector('input[type=date]');if(f)setTimeout(()=>f.focus({preventScroll:true}),350);}});
 $('#fee-amt').addEventListener('input',(e)=>{state.fee=num(e.target.value);render();});$('#fee-amt').addEventListener('change',(e)=>fmtIn(e.target));
 $('#fee-waive').addEventListener('change',(e)=>{state.waive=e.target.checked;render();});
 $('#disc-type').addEventListener('change',(e)=>{state.discType=e.target.value;$('#disc-val').disabled=state.discType==='none';$('#disc-sym').textContent=state.discType==='pct'?'%':'$';if(state.discType==='none'){state.discVal=0;$('#disc-val').value='';}render();});
@@ -463,9 +464,12 @@ let dealCode=null,saveTimer=null,dirty=false,locked=false;
 function persist(){if(locked)return;dirty=true;clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,600);}
 async function saveNow(){if(!dirty||locked)return;dirty=false;try{const r=await api('/api/deals/'+(dealCode||'new'),{method:'PUT',body:JSON.stringify({deal:snapshot(),contact:state.client,rep:REP,email:REP_EMAIL})});dealCode=r.code;$('#deal-code').textContent=dealCode;}catch(e){toast('Could not save: '+e.message);}}
 let talkOpen=false;
-$('#talk-toggle').addEventListener('click',()=>{talkOpen=!talkOpen;render();});
-$('#talk-close').addEventListener('click',()=>{talkOpen=false;render();});
-document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&talkOpen){talkOpen=false;render();}});
+function setTalk(open){talkOpen=open;const t=$('#talk'),b=$('#talk-toggle');t.hidden=!open;b.setAttribute('aria-expanded',String(open));
+  // keep the viewport where the rep is looking: the box opens right under the button, and closing returns to the button
+  (open?t:b).scrollIntoView({block:'nearest',behavior:'smooth'});}
+$('#talk-toggle').addEventListener('click',()=>setTalk(!talkOpen));
+$('#talk-close').addEventListener('click',()=>setTalk(false));
+document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&talkOpen)setTalk(false);});
 function toast(t,ms=3200){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),ms);}
 // ---------- live link + send ----------
 $('#sharelink').addEventListener('click',async()=>{dirty=true;await saveNow();if(!dealCode)return;$('#sharelink').disabled=true;$('#sharelink').textContent='Sending…';
