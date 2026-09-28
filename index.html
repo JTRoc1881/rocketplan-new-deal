@@ -399,7 +399,7 @@ function feeHint(){const sel=PACKAGES.filter(p=>state.packages.has(p.id));const 
 
 // ---------- plan / fee / discount ----------
 $('#plans').addEventListener('change',(e)=>{state.plan=e.target.value;render();
-  if(state.plan==='split'){const sc=$('#sched');sc.scrollIntoView({block:'nearest',behavior:'smooth'});const f=sc.querySelector('input[type=date]');if(f)setTimeout(()=>f.focus({preventScroll:true}),350);}});
+  if(state.plan==='split'){const sc=$('#sched');sc.scrollIntoView({block:'nearest',behavior:'smooth'});const f=sc.querySelector('input[type=date]:not([readonly])')||sc.querySelector('input[type=number]');if(f)setTimeout(()=>f.focus({preventScroll:true}),350);}});
 $('#fee-amt').addEventListener('input',(e)=>{state.fee=num(e.target.value);render();});$('#fee-amt').addEventListener('change',(e)=>fmtIn(e.target));
 $('#fee-waive').addEventListener('change',(e)=>{state.waive=e.target.checked;render();});
 $('#disc-type').addEventListener('change',(e)=>{state.discType=e.target.value;$('#disc-val').disabled=state.discType==='none';$('#disc-sym').textContent=state.discType==='pct'?'%':'$';if(state.discType==='none'){state.discVal=0;$('#disc-val').value='';}render();});
