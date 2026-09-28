@@ -5,7 +5,8 @@
 *{box-sizing:border-box}body{margin:0;background:var(--white);color:var(--ink);font:400 16px/24px "IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
 .present{max-width:820px;margin:0 auto;padding:36px 20px 60px}
 .pr-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;color:var(--muted);font-size:14px;flex-wrap:wrap}.pr-top img{height:34px}
-h1{font-size:30px;line-height:36px;margin:0 0 20px;font-weight:700;letter-spacing:-.01em}.eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin:0 0 6px}.h1sub{display:block;font-size:15px;line-height:22px;font-weight:400;color:var(--muted);margin-top:4px}
+h1{font-size:30px;line-height:36px;margin:0 0 20px;font-weight:700;letter-spacing:-.01em}.terms{margin-top:14px;padding:14px 18px;border:1px solid var(--border);border-radius:12px;background:var(--white);font-size:13.5px;line-height:20px;color:var(--muted)}.terms .t{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--purple);margin-bottom:6px}.terms ul{margin:0;padding-left:18px}.terms li+li{margin-top:4px}.terms a,.pr-foot a{color:var(--purple);font-weight:600;text-decoration:none}.terms a:hover,.pr-foot a:hover{text-decoration:underline}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin:0 0 6px}.h1sub{display:block;font-size:15px;line-height:22px;font-weight:400;color:var(--muted);margin-top:4px}
 .pr-card{border:1px solid var(--card-border);border-radius:14px;overflow:hidden}
 .pr-row{display:grid;grid-template-columns:40px 1fr auto;gap:16px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}.pr-row:last-child{border-bottom:0}.pr-row img{width:40px;height:40px;border-radius:999px}
 .pr-n{font-size:18px;font-weight:600}.pr-d{font-size:14px;color:var(--muted);line-height:20px;margin-top:2px}
@@ -41,7 +42,13 @@ function render(v){
   const sched=v.split&&v.lines.length?`<div class="sched">${v.split.map((r,i)=>`<div><span>${i===0?'At signing':fmtDate(r.date)}</span><b>${money2(v.total*r.pct/100)}</b></div>`).join('')}</div>`:'';
   const steps=sent?`<div class="steps">
     <div class="step ${v.signedAt?'done':''}"><span class="n">${v.signedAt?'✓':'1'}</span><div><div class="t">Review and sign the order form</div><div class="d">${v.signedAt?'Signed. Thank you.':'We emailed it to you. Open it, tick the three confirmations and sign.'}</div></div>${v.signUrl&&!v.signedAt?`<a class="btn" href="${v.signUrl}" target="_blank" rel="noopener">Open the form</a>`:''}</div>
-    <div class="step ${v.paidAt?'done':''}"><span class="n">${v.paidAt?'✓':'2'}</span><div><div class="t">Make your first payment</div><div class="d">${v.paidAt?'Received. Your subscription is active.':'Pay '+money2(v.todayAmount)+' by card. Later instalments and renewals charge the same card automatically.'}</div></div>${v.payUrl&&!v.paidAt?`<a class="btn ${v.signedAt?'':'ghost'}" href="${v.payUrl}" target="_blank" rel="noopener">${v.signedAt?'Pay now':'After signing'}</a>`:''}</div>
+    <div class="step ${v.paidAt?'done':''}"><span class="n">${v.paidAt?'✓':'2'}</span><div><div class="t">Make your first payment</div><div class="d">${v.paidAt?'Received. Your subscription is active.':'Pay '+money2(v.todayAmount)+' by card. Later instalments and renewals charge the same card automatically.'}</div></div>${v.payUrl&&!v.paidAt?(v.signedAt?`<a class="btn" href="${v.payUrl}" target="_blank" rel="noopener">Pay now</a>`:`<span class="btn ghost" aria-disabled="true">After signing</span>`):''}</div>
+    <div class="terms"><div class="t">What you are agreeing to</div><ul>
+      <li>A 12-month subscription that starts with your first payment and renews automatically each year at the list price for your package.</li>
+      <li>${v.plan==='full'?'Paid in full at signing.':v.plan==='monthly'?'12 monthly payments; the card you use today is charged automatically each month.':v.plan==='quarterly'?'4 quarterly payments; the card you use today is charged automatically every 3 months.':'Payments on the dates above; the card you use today is charged automatically on each date.'}</li>
+      <li>Cancel any time by written notice, effective at the end of the current term. Fees are non-refundable.</li>
+      <li>Governed by the RocketPlan <a href="https://rocketplantech.com/terms-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="https://rocketplantech.com/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a>. You confirm both when you sign the order form.</li>
+    </ul></div>
   </div>`:'';
   $('#root').innerHTML=`<div class="pr-top"><img src="${LOGO}" alt="RocketPlan"><span>${sent?'Your order':'<span class="live">Live</span> · updates as we talk'}</span></div>
     <div class="eyebrow">Your RocketPlan package</div>
@@ -53,7 +60,7 @@ function render(v){
       <div class="pr-stat hi"><div class="pr-l">Due at signing</div><div class="pr-b">${money2(v.todayAmount)}</div></div>
       <div class="pr-stat"><div class="pr-l">Renews</div><div class="pr-b" style="font-size:18px">${fmtDate(v.renews)}</div><div class="pr-s">${money(v.annualList)} / year, list price</div></div>
     </div>${steps}`:`<div class="pr-empty">${esc(v.rep)} is building your package. It will appear here.</div>`}
-    <div class="pr-foot">12-month subscription · cancel any time before renewal · prices in USD, taxes excluded</div>`;
+    <div class="pr-foot">12-month subscription · cancel any time before renewal · prices in USD, taxes excluded · <a href="https://rocketplantech.com/terms-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a> · <a href="https://rocketplantech.com/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a></div>`;
 }
 async function tick(){try{const r=await fetch(API+'/api/public/'+CODE,{cache:'no-store'});if(!r.ok)throw 0;const v=await r.json();const s=JSON.stringify(v);if(s!==last){last=s;render(v);}}catch(e){if(!last)$('#root').innerHTML='<div class="pr-empty">This link is not valid.</div>';}}
 tick();setInterval(tick,4000);
