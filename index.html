@@ -28,7 +28,8 @@ h1{font-size:30px;line-height:36px;margin:0 0 20px;font-weight:700;letter-spacin
 </style></head><body>
 <div class="present" id="root"><div class="pr-empty">Loading your package…</div></div>
 <script>
-const CODE=(new URLSearchParams(location.search).get('c')||'').toUpperCase();const API='https://irrxupzubigjytxeeapu.supabase.co/functions/v1/new-deal';const $=s=>document.querySelector(s);
+const Q0=new URLSearchParams(location.search);if(!Q0.get('c')&&Q0.get('k')){location.replace('/new/'+location.search);}
+const CODE=(Q0.get('c')||'').toUpperCase();const API='https://irrxupzubigjytxeeapu.supabase.co/functions/v1/new-deal';const $=s=>document.querySelector(s);
 const money=n=>'$'+Math.round(n).toLocaleString('en-US');const money2=n=>Math.abs(n-Math.round(n))<0.005?money(n):'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmtDate=iso=>new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
