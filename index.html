@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your RocketPlan package</title><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your RocketPlan package</title><script src="/icons.js"></script><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root{--purple:#9A00FF;--purple-2:#6D00E6;--purple-light:#F4E5FF;--ink:#1E0D47;--white:#fff;--bg:#F3F3F6;--border:#E8E7ED;--card-border:#D2CFDA;--muted:#777185;--icon:#5B476B;--green-dark:#007760;--green:#40C9AE;--green-light:#DCF5F0}
@@ -8,7 +8,7 @@
 h1{font-size:30px;line-height:36px;margin:0 0 20px;font-weight:700;letter-spacing:-.01em}.terms{margin-top:14px;padding:14px 18px;border:1px solid var(--border);border-radius:12px;background:var(--white);font-size:13.5px;line-height:20px;color:var(--muted)}.terms .t{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--purple);margin-bottom:6px}.terms ul{margin:0;padding-left:18px}.terms li+li{margin-top:4px}.terms a,.pr-foot a{color:var(--purple);font-weight:600;text-decoration:none}.terms a:hover,.pr-foot a:hover{text-decoration:underline}
 .eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--purple);margin:0 0 6px}.h1sub{display:block;font-size:15px;line-height:22px;font-weight:400;color:var(--muted);margin-top:4px}
 .pr-card{border:1px solid var(--card-border);border-radius:14px;overflow:hidden}
-.pr-row{display:grid;grid-template-columns:40px 1fr auto;gap:16px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}.pr-row:last-child{border-bottom:0}.pr-row img{width:40px;height:40px;border-radius:999px}
+.pr-row{display:grid;grid-template-columns:40px 1fr auto;gap:16px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--border)}.pr-row:last-child{border-bottom:0}.pr-row .rp-icon{display:block}.pr-row img{width:40px;height:40px;border-radius:999px}
 .pr-n{font-size:18px;font-weight:600}.pr-d{font-size:14px;color:var(--muted);line-height:20px;margin-top:2px}
 .pr-v{font-size:20px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}.pr-v small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
 .pr-tag{font-size:12px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:2px 8px;border-radius:999px;vertical-align:middle}
@@ -37,8 +37,8 @@ const LOGO='https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c6903
 let last='';
 function render(v){
   const sent=['sent','signed','paid'].includes(v.status);
-  const rows=v.lines.map(l=>`<div class="pr-row"><img src="${MARK}" alt=""><div><div class="pr-n">${esc(l.name)}</div><div class="pr-d">${esc(l.desc)}</div></div><div class="pr-v">${money(l.unit)}<small>${l.every?'every '+l.every:'one time'}</small></div></div>`).join('');
-  const fee=v.lines.length&&v.fee?`<div class="pr-row"><img src="${MARK}" alt=""><div><div class="pr-n">Set Up Fee${v.waive?' <span class="pr-tag">waived</span>':''}</div><div class="pr-d">One-time onboarding, account setup and training.</div></div><div class="pr-v">${money(v.fee)}<small>one time</small></div></div>`:'';
+  const rows=v.lines.map(l=>`<div class="pr-row">${rpIcon(rpIconFor(l.name),40)}<div><div class="pr-n">${esc(l.name)}</div><div class="pr-d">${esc(l.desc)}</div></div><div class="pr-v">${money(l.unit)}<small>${l.every?'every '+l.every:'one time'}</small></div></div>`).join('');
+  const fee=v.lines.length&&v.fee?`<div class="pr-row">${rpIcon('fee',40)}<div><div class="pr-n">Set Up Fee${v.waive?' <span class="pr-tag">waived</span>':''}</div><div class="pr-d">One-time onboarding, account setup and training.</div></div><div class="pr-v">${money(v.fee)}<small>one time</small></div></div>`:'';
   const plan={full:'Paid in full, renews yearly',split:'Split payments on agreed dates',quarterly:'4 quarterly payments',monthly:'12 monthly payments'}[v.plan];
   const sched=v.split&&v.lines.length?`<div class="sched">${v.split.map((r,i)=>`<div><span>${i===0?'At signing':fmtDate(r.date)}</span><b>${money2(v.total*r.pct/100)}</b></div>`).join('')}</div>`:'';
   const steps=sent?`<div class="steps">

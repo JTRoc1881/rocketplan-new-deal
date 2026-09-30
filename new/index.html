@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RocketPlan New Deal</title><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RocketPlan New Deal</title><script src="/icons.js"></script><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root{
@@ -56,7 +56,7 @@ button,input,select{font:inherit;color:inherit}
 /* package rows */
 .list{display:flex;flex-direction:column;gap:10px}
 .list+.lbl{margin-top:20px}
-.pk{position:relative;display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--white);cursor:pointer;transition:background .12s,border-color .12s,box-shadow .12s}
+.pk{position:relative;display:grid;grid-template-columns:20px 40px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:10px;background:var(--white);cursor:pointer;transition:background .12s,border-color .12s,box-shadow .12s}
 .pk:hover{background:var(--input-hover);border-color:var(--card-border)}
 .pk:has(input:checked){background:var(--purple-light);border-color:var(--purple);box-shadow:0 0 0 1px var(--purple) inset}
 .pk input[type=checkbox],.pk input[type=radio]{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
@@ -66,11 +66,11 @@ button,input,select{font:inherit;color:inherit}
 .pk:has(input:checked) .box::after{content:"";position:absolute;left:5px;top:2px;width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
 .pk.radio:has(input:checked) .box::after{left:5px;top:5px;width:6px;height:6px;border:0;border-radius:999px;background:#fff;transform:none}
 .pk input:focus-visible~.box{outline:2px solid var(--purple);outline-offset:2px}
-.pk .nm{font-weight:600}
+.pk .nm{font-weight:600}.pk .ico{display:flex;align-items:center}.pk .ico svg{display:block}
 .pk .inc{font-size:12.5px;line-height:17px;color:var(--muted);margin-top:1px}
 .pk .pr{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;font-weight:600}
 .pk .pr small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
-.pk .ov{display:none;grid-column:2/4;position:relative;z-index:1;align-items:center;gap:8px;font-size:13px;color:var(--icon);margin-top:2px}
+.pk .ov{display:none;grid-column:2/5;position:relative;z-index:1;align-items:center;gap:8px;font-size:13px;color:var(--icon);margin-top:2px}
 .pk:has(input:checked) .ov{display:flex;flex-wrap:wrap}
 .pk .ov .lab{font-size:12px;font-weight:600;color:var(--purple)}
 .pk .ov input[type=text]{position:static;opacity:1;width:96px;height:32px;padding:0 8px;border:1px solid var(--card-border);border-radius:var(--r-sm);font-variant-numeric:tabular-nums;background:var(--white);font-weight:600;color:var(--ink)}
@@ -174,7 +174,7 @@ button,input,select{font:inherit;color:inherit}
 .dt th.r,.dt td.r{text-align:right}
 .dt td{padding:12px 8px 12px 0;border-bottom:1px solid var(--border);vertical-align:top}
 .dt td .n{font-weight:600}.dt td .d{font-size:13px;color:var(--muted);line-height:18px;margin-top:2px}
-.dt td img{width:28px;height:28px;vertical-align:middle;margin-right:10px}
+.dt td img,.dt td .rp-icon{width:28px;height:28px;vertical-align:middle;margin-right:10px}
 .dt .rep{font-size:12px;color:var(--muted);display:block}
 .dt tfoot td{border:0;padding:8px 8px 4px 0}
 .dt tfoot .tot td{font-weight:700;font-size:18px;padding-top:12px}
@@ -388,7 +388,7 @@ function pick(id){state.client=CONTACTS.find(c=>c.id===id);menu.hidden=true;$('#
 $('#cc-change').addEventListener('click',()=>{state.client=null;chosen.hidden=true;newc.hidden=true;$('#combo').hidden=false;$('#cc-sub').textContent='';search.value='';search.focus();render();});
 
 // ---------- packages: one RocketPlan tier (radio) + add-ons (checkboxes) ----------
-const card=(p,type)=>`<label class="pk ${type==='radio'?'radio':''}"><input type="${type}" name="${type==='radio'?'tier':'addon-'+p.id}" value="${p.id}"><span class="box"></span><span><span class="nm">${p.name}</span><div class="inc">${p.inc}</div></span><span class="pr">${money(p.annual)}<small>/ year · ${money(monthly(p.annual))} / mo</small></span><span class="ov"><span class="lab">Deal price</span>$<input type="text" inputmode="numeric" data-ov="${p.id}" value="${p.annual.toLocaleString('en-US')}" aria-label="${p.name} annual price"><span>/ year</span><button type="button" class="reset" data-reset="${p.id}" hidden>back to list</button><span class="sep"></span><span class="lab">Description on the agreement</span><textarea rows="2" data-desc="${p.id}" aria-label="${p.name} description">${p.inc}</textarea></span></label>`;
+const card=(p,type)=>`<label class="pk ${type==='radio'?'radio':''}"><input type="${type}" name="${type==='radio'?'tier':'addon-'+p.id}" value="${p.id}"><span class="box"></span><span class="ico">${rpIcon(p.id,40)}</span><span><span class="nm">${p.name}</span><div class="inc">${p.inc}</div></span><span class="pr">${money(p.annual)}<small>/ year · ${money(monthly(p.annual))} / mo</small></span><span class="ov"><span class="lab">Deal price</span>$<input type="text" inputmode="numeric" data-ov="${p.id}" value="${p.annual.toLocaleString('en-US')}" aria-label="${p.name} annual price"><span>/ year</span><button type="button" class="reset" data-reset="${p.id}" hidden>back to list</button><span class="sep"></span><span class="lab">Description on the agreement</span><textarea rows="2" data-desc="${p.id}" aria-label="${p.name} description">${p.inc}</textarea></span></label>`;
 function onPkChange(e){const t=e.target;
   if(t.dataset.desc!==undefined){state.desc[t.dataset.desc]=t.value;render();return;}
   if(t.dataset.ov!==undefined){const id=t.dataset.ov,v=num(t.value);state.override[id]=v;const p=PACKAGES.find(x=>x.id===id);t.closest('.ov').querySelector('.reset').hidden=(v===p.annual);if(e.type==='change')fmtIn(t);render();return;}
@@ -479,12 +479,12 @@ document.addEventListener('keydown',(e)=>{if(e.key==='Escape'&&talkOpen)setTalk(
 function toast(t,ms=3200){const el=$('#toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),ms);}
 // ---------- live link + send ----------
 $('#sharelink').addEventListener('click',async()=>{dirty=true;await saveNow();if(!dealCode)return;$('#sharelink').disabled=true;$('#sharelink').textContent='Sending…';
-  try{const r=await api('/api/deals/'+dealCode+'/link',{method:'POST'});$('#share-url').textContent=r.link.replace(/^https?:\/\//,'');$('#share-url').dataset.href=r.link;$('#sharebox').hidden=false;$('#share-to').textContent=(state.client?state.client.email:'')+(r.sent.includes('SMS')?' and by SMS':'');$('#sharelink').textContent=r.sent.length?'Live link sent':'Live link ready (copy it)';toast(r.sent.length?'Live link sent to the client.':'Could not send from GHL; copy the link and send it yourself.');}
+  try{const r=await api('/api/deals/'+dealCode+'/link',{method:'POST'});$('#share-url').textContent=r.link.replace(/^https?:\/\//,'');$('#share-url').dataset.href=r.link;$('#sharebox').hidden=false;$('#share-to').textContent=(state.client?state.client.email:'')+(r.sent.includes('SMS')?' and by SMS':'');$('#sharelink').textContent=r.sent.length?'Live link sent':'Live link ready (copy it)';if(r.sent.length)rpLaunch($('#sharelink'));toast(r.sent.length?'Live link sent to the client.':'Could not send from GHL; copy the link and send it yourself.');}
   catch(e){$('#sharelink').disabled=false;$('#sharelink').textContent='Send live link to the client';toast(e.message);}});
 $('#share-copy').addEventListener('click',()=>{const u=$('#share-url').dataset.href||('https://'+$('#share-url').textContent);navigator.clipboard?.writeText(u).then(()=>{$('#share-copy').textContent='Copied';setTimeout(()=>$('#share-copy').textContent='Copy',1500);}).catch(()=>{});});
 $('#share-open').addEventListener('click',()=>{const u=$('#share-url').dataset.href;if(u)window.open(u,'_blank');});
 $('#send').addEventListener('click',async()=>{if(!state.client)return;$('#send').disabled=true;$('#send').textContent='Sending…';dirty=true;await saveNow();
-  try{const r=await api('/api/deals/'+dealCode+'/send',{method:'POST'});locked=true;$('#status-pill').textContent='Sent · '+dealCode;$('#send').textContent='Order form sent';
+  try{const r=await api('/api/deals/'+dealCode+'/send',{method:'POST'});locked=true;rpLaunch($('#send'));$('#status-pill').textContent='Sent · '+dealCode;$('#send').textContent='Order form sent';
     $('#why').innerHTML=`Invoice <a href="${r.invoiceUrl}" target="_blank" rel="noopener">${r.invoiceUrl.replace(/^https?:\/\//,'')}</a> created.${r.docErr?' The order form could not be sent automatically: '+esc(r.docErr):' The client has the order form by email and SMS.'} <button class="link" type="button" id="newdeal">Start another deal</button>`;
     $('#newdeal').addEventListener('click',()=>location.reload());document.querySelectorAll('#form input,#form select,#form textarea,#form button').forEach(el=>el.disabled=true);}
   catch(e){$('#send').disabled=false;$('#send').innerHTML='Send order form <span aria-hidden="true">→</span>';toast(e.message,6000);}});
@@ -495,8 +495,8 @@ function renderPreview(){
   const p=price(state);const c=state.client;const today=new Date();
   const per=state.plan==='monthly'?'month':state.plan==='quarterly'?'3 months':state.plan==='full'?'year':null;
   const rows=p.sel.map(pk=>{const a=usedAnnual(state,pk);const unit=state.plan==='monthly'?monthly(a):state.plan==='quarterly'?quarterly(a):a;
-    return `<tr><td><img src="https://msgsndr-private.storage.googleapis.com/companyPhotos/49c30135-8b71-4e68-9941-e496becf95f9.png" alt=""><span class="n">${esc(pk.name)}</span><div class="d">${esc(usedDesc(state,pk))} 12-month subscription, renews automatically each year at ${money(pk.annual)} per year.</div></td><td class="r">${money(unit)}${per?`<span class="rep">Repeats every ${per}</span>`:'<span class="rep">One time</span>'}</td><td class="r">1</td><td class="r">${money(unit)}</td></tr>`;}).join('')
-    +`<tr><td><img src="https://msgsndr-private.storage.googleapis.com/companyPhotos/49c30135-8b71-4e68-9941-e496becf95f9.png" alt=""><span class="n">Set Up Fee</span><div class="d">One-time onboarding, account setup and training.</div></td><td class="r">${money(p.fee)}<span class="rep">One time</span></td><td class="r">1</td><td class="r">${money(p.fee)}</td></tr>`;
+    return `<tr><td>${rpIcon(pk.id,28)}<span class="n">${esc(pk.name)}</span><div class="d">${esc(usedDesc(state,pk))} 12-month subscription, renews automatically each year at ${money(pk.annual)} per year.</div></td><td class="r">${money(unit)}${per?`<span class="rep">Repeats every ${per}</span>`:'<span class="rep">One time</span>'}</td><td class="r">1</td><td class="r">${money(unit)}</td></tr>`;}).join('')
+    +`<tr><td>${rpIcon('fee',28)}<span class="n">Set Up Fee</span><div class="d">One-time onboarding, account setup and training.</div></td><td class="r">${money(p.fee)}<span class="rep">One time</span></td><td class="r">1</td><td class="r">${money(p.fee)}</td></tr>`;
   const firstCharge=p.today;
   let schedTxt='';
   if(state.plan==='full')schedTxt=`<div class="row2"><span>Then</span><span>${money(p.annualList)} every year, starting ${fmtDate(addMonths(today,12))}</span></div>`;
