@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta name="robots" content="noindex, nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RocketPlan New Deal</title><script src="/icons.js"></script><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RocketPlan New Deal</title><script src="/icons.js"></script><script src="/pricing.js"></script><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root{
@@ -119,7 +119,8 @@ button,input,select{font:inherit;color:inherit}
 .money-in input{border:0;outline:none;width:90px;height:100%;background:transparent;color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 .money-in:focus-within{border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
 .stack{display:flex;flex-direction:column;gap:10px}
-.stack .row{padding:14px 16px;border:1px solid var(--border);border-radius:10px}
+.stack .row{padding:14px 16px;border:1px solid var(--border);border-radius:10px}.stack .row.off .t{color:var(--muted)}.stack .row.off .switch{opacity:.5}.switch input:disabled{cursor:default}
+.pay-sum{margin-top:10px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;line-height:19px;color:var(--icon)}.pay-sum b{color:var(--ink);font-weight:600}.pay-sum .pr{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}.pay-sum .pr+.pr{margin-top:3px}.pay-sum .ph{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--muted);margin-bottom:4px}
 .disc{display:grid;grid-template-columns:130px 1fr;gap:10px;max-width:360px}
 .disc select{height:40px;padding:0 12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--white);width:100%}
 .disc select:focus{outline:none;border-color:var(--input-border);box-shadow:0 0 0 3px var(--purple-light)}
@@ -237,6 +238,7 @@ button,input,select{font:inherit;color:inherit}
         <div class="stack">
           <div class="row"><div><div class="t">Onboarding, account setup and training</div><div class="d" id="fee-sub">One-time, charged with the first payment.</div></div><span class="money-in">$<input id="fee-amt" type="text" inputmode="numeric" value="1,500" aria-label="Setup fee amount"></span></div>
           <div class="row"><div><div class="t">Waive the setup fee</div><div class="d">Keeps the line on the invoice and adds a matching credit.</div></div><label class="switch"><input type="checkbox" id="fee-waive"><span></span></label></div>
+          <div class="row" id="fee-fin-row"><div><div class="t">Spread the setup fee across the payments</div><div class="d" id="fee-fin-sub">No interest. Blends the fee into every payment instead of charging it all with the first one.</div></div><label class="switch"><input type="checkbox" id="fee-fin"><span></span></label></div>
         </div>
       </section>
 <section class="sec">
@@ -258,7 +260,7 @@ button,input,select{font:inherit;color:inherit}
         </div>
       </section>
 <section class="sec">
-        <div class="lead"><span class="num" id="st5">05</span><div><h2>Discount</h2><p class="sub">Optional. First year only; renewal is at list price.</p></div></div>
+        <div class="lead"><span class="num" id="st5">05</span><div><h2>Discount</h2><p class="sub">Optional. Comes off the subscription, first year only; renewal is at list price.</p></div></div>
         <div class="disc">
           <select id="disc-type" aria-label="Discount type"><option value="none">None</option><option value="pct">Percent</option><option value="amt">Amount</option></select>
           <span class="money-in" id="disc-wrap"><span id="disc-sym">$</span><input id="disc-val" type="text" inputmode="numeric" placeholder="0" aria-label="Discount value" disabled></span>
@@ -285,6 +287,7 @@ button,input,select{font:inherit;color:inherit}
         <div class="hr"></div>
         <div class="total"><span class="lab" id="tot-lab">First-year total</span><span class="num" id="tot-num">$0</span></div>
         <div class="today"><div class="lab" id="today-lab">Customer pays today</div><div class="num" id="today-num">$0</div><div class="sub2" id="today-sub">Nothing is charged until the client signs.</div></div>
+        <div class="pay-sum" id="pay-sum" hidden></div>
         <div class="renew" id="renew" hidden><span class="dot"></span><span id="renew-txt"></span></div>
         <button class="cta" id="send" type="button" disabled>Send order form <span aria-hidden="true">→</span></button>
         <button class="pv-btn" id="preview" type="button" disabled>Preview what the client receives</button>
@@ -327,34 +330,21 @@ const quarterly=(annual)=>monthly(annual)*3;
 // annual price actually used for a package = override when set, else list
 const usedAnnual=(state,p)=>state.override[p.id]!=null?state.override[p.id]:p.annual;
 const usedDesc=(state,p)=>(state.desc[p.id]??p.inc).trim();
+// All money math is in /pricing.js, the same file the server uses for the invoice. This only maps the builder
+// state onto it. Returns totals plus payments[] ({date, amount, sub, fee}) and rest ({count, amount}) for "then N x".
 function price(state){
-  const sel=PACKAGES.filter(p=>state.packages.has(p.id));
-  const annualList=sel.reduce((a,p)=>a+p.annual,0);              // renewal basis (catalog)
-  const annualUsed=sel.reduce((a,p)=>a+usedAnnual(state,p),0);   // this order
-  const perMonth=sel.reduce((a,p)=>a+monthly(usedAnnual(state,p)),0);
-  const perQuarter=sel.reduce((a,p)=>a+quarterly(usedAnnual(state,p)),0);
-  const base=state.plan==='monthly'?perMonth*12:state.plan==='quarterly'?perQuarter*4:annualUsed;
-  const fee=sel.length?state.fee:0;
-  const gross=base+fee;
-  const waive=state.waive?fee:0;
-  let disc=0;
-  if(state.discType==='pct')disc=(gross-waive)*Math.min(100,Math.max(0,state.discVal))/100;
-  if(state.discType==='amt')disc=Math.min(gross-waive,Math.max(0,state.discVal));
-  const total=gross-waive-disc;
-  const ratio=gross?total/gross:1;  // share of the gross the client actually pays
-  let today=total, schedule=null;
-  if(state.plan==='monthly'){const m=perMonth*ratio;today=(perMonth+fee)*ratio;schedule={per:m,count:12,every:'month'};}
-  if(state.plan==='quarterly'){const q=perQuarter*ratio;today=(perQuarter+fee)*ratio;schedule={per:q,count:4,every:'3 months'};}
-  if(state.plan==='split'){const sum=state.split.reduce((a,r)=>a+(+r.pct||0),0);schedule={rows:state.split.map(r=>({...r,amount:total*(+r.pct||0)/100})),sum};today=total*(+state.split[0]?.pct||0)/100;}
-  return {sel,annualList,annualUsed,perMonth,perQuarter,base,fee,waive,gross,disc,total,today,schedule};
+  const start=state.plan==='split'&&state.split[0]&&state.split[0].date?state.split[0].date:todayISO();
+  return RP_PRICING.compute(PACKAGES,snapshot(),start);
 }
 function addMonths(d,n){const x=new Date(d);x.setMonth(x.getMonth()+n);return x;}
 const fmtDate=(d)=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 const iso=(d)=>d.toISOString().slice(0,10);
+const todayISO=()=>new Date().toLocaleDateString('en-CA');   // local YYYY-MM-DD
+const fmtISO=(s)=>fmtDate(new Date(s+'T12:00:00'));
 
 // ---------- state ----------
-const state={client:null,packages:new Set(),override:{},desc:{},plan:'full',fee:1500,waive:false,discType:'none',discVal:0,
-  split:[{pct:50,date:iso(new Date())},{pct:50,date:iso(addMonths(new Date(),1))}]};
+const state={client:null,packages:new Set(),override:{},desc:{},plan:'full',fee:1500,waive:false,feeMode:'upfront',discType:'none',discVal:0,
+  split:[{pct:50,date:todayISO()},{pct:50,date:RP_PRICING.addMonthsISO(todayISO(),1)}]};
 
 function esc(t){return String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 // ---------- client combobox ----------
@@ -400,32 +390,55 @@ function onPkChange(e){const t=e.target;
   $(sel).addEventListener('click',(e)=>{if(e.target.closest('.ov'))e.stopPropagation();});});
 // allow un-picking the tier by clicking the selected radio again
 $('#tiers').addEventListener('click',(e)=>{const r=e.target.closest('label')?.querySelector('input[type=radio]');if(r&&r.checked&&state.packages.has(r.value)&&e.target===r){r.checked=false;state.packages.delete(r.value);feeHint();render();}});
-function feeHint(){const sel=PACKAGES.filter(p=>state.packages.has(p.id));const rp=sel.some(p=>p.family==='rp'),crm=sel.some(p=>p.family==='crm');
-  $('#fee-sub').textContent=rp&&crm?'RocketPlan and RocketCRM together: consider $2,500 for both setups.':'One-time, charged with the first payment.';}
+function feeHint(){}   // the setup-fee helper text depends on the plan too, so render() writes it
 
 // ---------- plan / fee / discount ----------
 $('#plans').addEventListener('change',(e)=>{state.plan=e.target.value;render();
   if(state.plan==='split'){const sc=$('#sched');sc.scrollIntoView({block:'nearest',behavior:'smooth'});const f=sc.querySelector('input[type=date]:not([readonly])')||sc.querySelector('input[type=number]');if(f)setTimeout(()=>f.focus({preventScroll:true}),350);}});
 $('#fee-amt').addEventListener('input',(e)=>{state.fee=num(e.target.value);render();});$('#fee-amt').addEventListener('change',(e)=>fmtIn(e.target));
 $('#fee-waive').addEventListener('change',(e)=>{state.waive=e.target.checked;render();});
+$('#fee-fin').addEventListener('change',(e)=>{state.feeMode=e.target.checked?'financed':'upfront';render();});
 $('#disc-type').addEventListener('change',(e)=>{state.discType=e.target.value;$('#disc-val').disabled=state.discType==='none';$('#disc-sym').textContent=state.discType==='pct'?'%':'$';if(state.discType==='none'){state.discVal=0;$('#disc-val').value='';}render();});
 $('#disc-val').addEventListener('input',(e)=>{state.discVal=num(e.target.value);render();});$('#disc-val').addEventListener('change',(e)=>{if(state.discType==='amt')fmtIn(e.target);});
 
 // ---------- split schedule ----------
 function renderSched(){const p=price(state);const rows=$('#sched-rows');
-  rows.innerHTML=state.split.map((r,i)=>`<tr><td><input type="number" min="1" max="100" value="${r.pct}" data-i="${i}" data-k="pct" aria-label="Share ${i+1}"></td><td><input type="date" value="${r.date}" data-i="${i}" data-k="date" aria-label="Due date ${i+1}" ${i===0?'readonly':''}></td><td class="amt">${p.schedule?money2(p.schedule.rows[i].amount):''}</td><td>${state.split.length>1?`<button class="rm" type="button" data-rm="${i}" aria-label="Remove payment">×</button>`:''}</td></tr>`).join('');
+  rows.innerHTML=state.split.map((r,i)=>`<tr><td><input type="number" min="1" max="100" value="${r.pct}" data-i="${i}" data-k="pct" aria-label="Share ${i+1}"></td><td><input type="date" value="${r.date}" data-i="${i}" data-k="date" aria-label="Due date ${i+1}" ${i===0?'readonly':''}></td><td class="amt">${p.payments[i]?money2(p.payments[i].amount):''}</td><td>${state.split.length>1?`<button class="rm" type="button" data-rm="${i}" aria-label="Remove payment">×</button>`:''}</td></tr>`).join('');
   const sum=state.split.reduce((a,r)=>a+(+r.pct||0),0);const t=$('#sched-tot');t.textContent=sum===100?'Adds up to 100%':`Adds up to ${sum}% (needs 100%)`;t.className='tot '+(sum===100?'ok':'bad');}
 $('#sched-rows').addEventListener('input',(e)=>{const i=+e.target.dataset.i,k=e.target.dataset.k;if(k==='pct')state.split[i].pct=+e.target.value||0;else state.split[i].date=e.target.value;render();});
 $('#sched-rows').addEventListener('click',(e)=>{const b=e.target.closest('[data-rm]');if(!b)return;state.split.splice(+b.dataset.rm,1);rebalance();render();});
-$('#sched-add').addEventListener('click',()=>{const last=state.split[state.split.length-1];state.split.push({pct:0,date:iso(addMonths(new Date(last.date),1))});rebalance();render();});
+$('#sched-add').addEventListener('click',()=>{const last=state.split[state.split.length-1];state.split.push({pct:0,date:RP_PRICING.addMonthsISO(last.date,1)});rebalance();render();});
 function rebalance(){const n=state.split.length;const each=Math.floor(100/n);state.split.forEach((r,i)=>r.pct=i===n-1?100-each*(n-1):each);}
 
 // ---------- render ----------
 function render(){
   const p=price(state);const has=p.sel.length>0;
   $('#st1').className='num'+(state.client?' done':'');$('#st2').className='num'+(has?' done':'');
-  $('#amt-full').innerHTML=has?`${money(p.annualUsed)}<small>at signing</small>`:'';$('#amt-split').innerHTML=has?`${money(p.annualUsed)}<small>your dates</small>`:'';$('#amt-quarterly').innerHTML=has?`${money(p.perQuarter)}<small>× 4</small>`:'';$('#amt-monthly').innerHTML=has?`${money(p.perMonth)}<small>× 12</small>`:'';
-  $('#today-sub').textContent=state.plan==='monthly'?'Month 1 plus setup fee, at signing.':state.plan==='quarterly'?'Quarter 1 plus setup fee, at signing.':state.plan==='split'?'First share, at signing.':'Full first year, at signing.';
+  // each plan row shows what the client would actually pay under that plan with the current fee and discount
+  const alt=(plan)=>plan===state.plan?p:RP_PRICING.compute(PACKAGES,{...snapshot(),plan},todayISO());
+  const rowAmt=(plan)=>{if(!has)return '';const a=alt(plan);
+    if(plan==='full')return `${money2(a.total)}<small>at signing</small>`;
+    if(plan==='split')return `${money2(a.total)}<small>your dates</small>`;
+    return `${money2(a.rest.amount)}<small>× ${a.count}${a.today!==a.rest.amount?' · first '+money2(a.today):''}</small>`;};
+  for(const k of ['full','split','quarterly','monthly'])$('#amt-'+k).innerHTML=rowAmt(k);
+  // what the first payment is made of
+  const pay=p.payments,n=p.count,f1=has?pay[0].fee:0;
+  const unit={monthly:'Month 1',quarterly:'Quarter 1',split:'First share',full:'Full first year'}[state.plan];
+  let todaySub='Nothing is charged until the client signs.';
+  if(has){
+    if(p.waive)todaySub=`${unit}, at signing. Setup fee waived.`;
+    else if(!p.feeDue)todaySub=`${unit}, at signing.`;
+    else if(p.feeMode==='financed')todaySub=`Payment 1 of ${n}, at signing. Includes ${money2(f1)} of the setup fee.`;
+    else if(n===1)todaySub=`${unit} (${money2(pay[0].sub)}) plus setup fee (${money2(f1)}), at signing.`;
+    else todaySub=`${unit} (${money2(pay[0].sub)}) plus setup fee (${money2(f1)}), at signing.`;
+  }
+  $('#today-sub').textContent=todaySub;
+  // setup fee: helper text and the "spread it" switch
+  const rpSel=p.sel.some(x=>x.family==='rp'),crmSel=p.sel.some(x=>x.family==='crm');
+  $('#fee-sub').textContent=(state.waive?'One-time. Waived: the client still sees the line, with a matching credit.':p.feeMode==='financed'?`One-time, spread across the ${n} payments.`:n>1?'One-time, charged with the first payment.':'One-time, charged at signing.')+(rpSel&&crmSel&&state.fee<2500?' RocketPlan and RocketCRM together: consider $2,500 for both setups.':'');
+  const canFin=has&&!state.waive&&p.fee>0&&n>1;
+  $('#fee-fin').disabled=!canFin;$('#fee-fin').checked=p.feeMode==='financed';$('#fee-fin-row').classList.toggle('off',!canFin);
+  $('#fee-fin-sub').textContent=state.waive?'Nothing to spread: the fee is waived.':has&&n===1?(state.plan==='full'?'Paid in full is one payment. Pick Monthly, Quarterly or Split to spread the fee.':'Add a second payment to spread the fee.'):!has||!p.fee?'No interest. Blends the fee into every payment instead of charging it all with the first one.':p.feeMode==='financed'?`No interest. ${state.plan==='split'?'The fee follows the same shares as the split':'Adds '+money2(pay[1].fee)+' to each of the '+n+' payments'}, instead of ${money2(p.feeDue)} on the first.`:`No interest. Turn on to ${state.plan==='split'?'share the '+money2(p.feeDue)+' fee across the '+n+' payments':'add '+money2(p.feeDue/n)+' to each of the '+n+' payments'} instead of charging it all with the first one.`;
   $('#sched').classList.toggle('on',state.plan==='split');if(state.plan==='split')renderSched();
   const notes={full:'<b>One yearly recurring invoice.</b> The client pays the annual amount today; it renews automatically each year.',
     split:'<b>Custom dates at the annual price.</b> The first share is charged when they sign; the rest is charged automatically on the dates below. Renews at the annual list price in 12 months.',
@@ -433,11 +446,13 @@ function render(){
     monthly:'<b>12 monthly payments, then annual.</b> Annual ÷ 10 per month. At month 12 the subscription renews at the annual list price, paid in full.'};
   $('#plan-note').innerHTML=notes[state.plan];
   $('#talk-bar').hidden=!has;if(!has){talkOpen=false;}const talk=$('#talk');talk.hidden=!(has&&talkOpen);$('#talk-toggle').setAttribute('aria-expanded',String(has&&talkOpen));
-  if(has){const q=money(p.perQuarter),m=money(p.perMonth);
-    const t={full:[`“We can also finance this over the year at no interest. Would ${m} a month or ${q} a quarter work better for your cash flow?”`,`Use this if the client hesitates on the price. Same 12-month term, same price, no interest. If they say yes, pick Quarterly or Monthly above.`],
-      split:[`“No interest on this. Let's put the first payment today and spread the rest on dates that suit you.”`,`Set the shares and dates below. The first share is charged when they sign.`],
-      quarterly:[`“That's four payments of ${q}, no interest, and it renews at the annual rate next year.”`,`First quarter plus setup fee is charged at signing; the next three are automatic.`],
-      monthly:[`“That's ${m} a month, no interest, for 12 months. Next year it renews at the annual rate.”`,`Month one plus setup fee is charged at signing; the other 11 are automatic.`]}[state.plan];
+  if(has){
+    const m=money2((state.plan==='monthly'?p:alt('monthly')).rest.amount),q=money2((state.plan==='quarterly'?p:alt('quarterly')).rest.amount);
+    const fin=p.feeMode==='financed',feeUp=p.feeDue>0&&!fin;
+    const t={full:[`“We can also finance this over the year at no interest. Would ${m} a month or ${q} a quarter work better for your cash flow?”`,`Use this if the client hesitates on the price. Same 12-month term, no interest. If they say yes, pick Quarterly or Monthly above.`],
+      split:[`“No interest on this. Let's put the first payment today and spread the rest on dates that suit you.”`,`Set the shares and dates below. The first share is charged when they sign.${feeUp?' The setup fee is added to the first payment.':fin?' The setup fee follows the same shares.':''}`],
+      quarterly:[fin?`“That's four payments of ${q}, setup included, no interest, and it renews at the annual rate next year.”`:`“That's four payments of ${q}, no interest, and it renews at the annual rate next year.”`,fin?`All four payments are the same. The first is charged at signing; the next three are automatic.`:feeUp?`The first quarter plus the setup fee (${money2(p.today)}) is charged at signing; the next three are automatic.`:`The first quarter is charged at signing; the next three are automatic.`],
+      monthly:[fin?`“That's ${m} a month for 12 months, setup included, no interest. Next year it renews at the annual rate.”`:`“That's ${m} a month, no interest, for 12 months. Next year it renews at the annual rate.”`,fin?`All 12 payments are the same. The first is charged at signing; the other 11 are automatic.`:feeUp?`Month one plus the setup fee (${money2(p.today)}) is charged at signing; the other 11 are automatic.`:`Month one is charged at signing; the other 11 are automatic.`]}[state.plan];
     $('#talk-q').textContent=t[0];$('#talk-s').textContent=t[1];}
   $('#sum-for').textContent=state.client?`For ${state.client.name}, ${state.client.company}`:'No client selected';
   const lines=$('#sum-lines');
@@ -447,9 +462,9 @@ function render(){
       const sub=state.plan==='monthly'?`${money(monthly(a))} / month × 12${ov}`:state.plan==='quarterly'?`${money(quarterly(a))} / quarter × 4${ov}`:`${money(a)} / year${ov}`;
       const v=state.plan==='monthly'?monthly(a)*12:state.plan==='quarterly'?quarterly(a)*4:a;
       return `<div class="line"><span class="l">${pk.name}<small>${sub}</small></span><span class="v">${money(v)}</span></div>`;}).join('');
-    h+=`<div class="line"><span class="l">Setup fee<small>one-time${state.waive?' · waived':''}</small></span><span class="v">${money(p.fee)}</span></div>`;
+    h+=`<div class="line"><span class="l">Setup fee<small>one-time · ${state.waive?'waived':p.feeMode==='financed'?'spread over '+n+' payments':n>1?'with the first payment':'at signing'}</small></span><span class="v">${money2(p.fee)}</span></div>`;
     if(p.waive)h+=`<div class="line disc"><span class="l">Setup fee waived</span><span class="v">−${money2(p.waive)}</span></div>`;
-    if(p.disc)h+=`<div class="line disc"><span class="l">Discount<small>first year only</small></span><span class="v">−${money2(p.disc)}</span></div>`;
+    if(p.disc)h+=`<div class="line disc"><span class="l">Discount<small>on the subscription, first year only</small></span><span class="v">−${money2(p.disc)}</span></div>`;
     lines.innerHTML=h;
   }
   $('#tot-lab').textContent=state.plan==='monthly'?'First-year total (12 payments)':state.plan==='quarterly'?'First-year total (4 payments)':'First-year total';
@@ -457,15 +472,23 @@ function render(){
   $('#today-lab').textContent='Customer pays today';
   $('#today-num').textContent=has?money2(p.today):'$0';
   const r=$('#renew');r.hidden=!has;
-  if(has){const d=addMonths(new Date(state.plan==='split'?state.split[0].date:new Date()),12);$('#renew-txt').innerHTML=`Renews <b>${fmtDate(d)}</b> at <b>${money(p.annualList)}/year</b> (list price), charged to the saved card. Cancel any time before then.`;}
+  if(has){$('#renew-txt').innerHTML=`Renews <b>${fmtISO(p.renews)}</b> at <b>${money(p.annualList)}/year</b> (list price), charged to the saved card. Cancel any time before then.`;}
+  const ps=$('#pay-sum');ps.hidden=!has||pay.length<2;
+  if(has&&pay.length>1){
+    const word={monthly:'monthly',quarterly:'quarterly'}[state.plan];
+    ps.innerHTML=p.rest&&word
+      ?`<div class="ph">After today</div>Then <b>${p.rest.count} ${word} payments of ${money2(p.rest.amount)}</b>, charged automatically. Next on ${fmtISO(pay[1].date)}, last on ${fmtISO(p.rest.lastDate)}.`
+      :`<div class="ph">After today</div>`+pay.slice(1).map(x=>`<div class="pr"><span>${fmtISO(x.date)}</span><b>${money2(x.amount)}</b></div>`).join('');
+  }
   let why='';
   if(!state.client)why='Choose a client to continue.';
   else if(!has)why='Pick a RocketPlan tier or an add-on.';
-  else if(state.plan==='split'&&p.schedule.sum!==100)why='The split must add up to 100%.';
+  else if(!p.valid)why='The split must add up to 100%.';
+  else if(p.total<=0)why='The total is zero. Lower the discount or add a package.';
   $('#send').disabled=!!why;$('#preview').disabled=!has;if($('#sharebox').hidden)$('#sharelink').disabled=!state.client;persist();$('#why').textContent=why||'Sends the order form by email and SMS. Nothing is charged until the client signs.';
 }
 // ---------- save to server (debounced) ----------
-function snapshot(){return {packages:[...state.packages],override:state.override,desc:state.desc,plan:state.plan,fee:state.fee,waive:state.waive,discType:state.discType,discVal:state.discVal,split:state.split};}
+function snapshot(){return {packages:[...state.packages],override:state.override,desc:state.desc,plan:state.plan,fee:state.fee,waive:state.waive,feeMode:state.feeMode,discType:state.discType,discVal:state.discVal,split:state.split};}
 let dealCode=null,saveTimer=null,dirty=false,locked=false;
 function persist(){if(locked)return;dirty=true;clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,600);}
 async function saveNow(){if(!dirty||locked)return;dirty=false;try{const r=await api('/api/deals/'+(dealCode||'new'),{method:'PUT',body:JSON.stringify({deal:snapshot(),contact:state.client,rep:REP,email:REP_EMAIL})});dealCode=r.code;$('#deal-code').textContent=dealCode;}catch(e){toast('Could not save: '+e.message);}}
@@ -493,16 +516,18 @@ $('#send').addEventListener('click',async()=>{if(!state.client)return;$('#send')
 
 function renderPreview(){
   const p=price(state);const c=state.client;const today=new Date();
-  const per=state.plan==='monthly'?'month':state.plan==='quarterly'?'3 months':state.plan==='full'?'year':null;
-  const rows=p.sel.map(pk=>{const a=usedAnnual(state,pk);const unit=state.plan==='monthly'?monthly(a):state.plan==='quarterly'?quarterly(a):a;
-    return `<tr><td>${rpIcon(pk.id,28)}<span class="n">${esc(pk.name)}</span><div class="d">${esc(usedDesc(state,pk))} 12-month subscription, renews automatically each year at ${money(pk.annual)} per year.</div></td><td class="r">${money(unit)}${per?`<span class="rep">Repeats every ${per}</span>`:'<span class="rep">One time</span>'}</td><td class="r">1</td><td class="r">${money(unit)}</td></tr>`;}).join('')
-    +`<tr><td>${rpIcon('fee',28)}<span class="n">Set Up Fee</span><div class="d">One-time onboarding, account setup and training.</div></td><td class="r">${money(p.fee)}<span class="rep">One time</span></td><td class="r">1</td><td class="r">${money(p.fee)}</td></tr>`;
+  const per=state.plan==='full'?'year':p.every;const pay=p.payments,n=p.count;
+  const feeNote=p.waive?' Waived on this order.':p.feeMode==='financed'?` Included in your ${n} payments.`:n>1?' Charged with the first payment.':'';
+  const rows=p.lines.map(l=>`<tr><td>${rpIcon(l.pkg.id,28)}<span class="n">${esc(l.pkg.name)}</span><div class="d">${esc(l.desc)} 12-month subscription, renews automatically each year at ${money(l.pkg.annual)} per year.</div></td><td class="r">${money2(l.per)}${per?`<span class="rep">Repeats every ${per}</span>`:'<span class="rep">One time</span>'}</td><td class="r">1</td><td class="r">${money2(l.per)}</td></tr>`).join('')
+    +`<tr><td>${rpIcon('fee',28)}<span class="n">Set Up Fee</span><div class="d">One-time onboarding, account setup and training.${feeNote}</div></td><td class="r">${money2(p.fee)}<span class="rep">One time</span></td><td class="r">1</td><td class="r">${money2(p.fee)}</td></tr>`;
   const firstCharge=p.today;
+  const feeRow=!p.feeDue||n<2?'':p.feeMode==='financed'?`<div class="row2"><span>Setup fee</span><span>${state.plan==='split'?'spread across your payments':money2(pay[1].fee)+' in each payment'}</span></div>`:`<div class="row2"><span>Today includes</span><span>the ${money2(pay[0].fee)} setup fee</span></div>`;
+  const renewRow=`<div class="row2"><span>From ${fmtISO(p.renews)}</span><span>${money(p.annualList)} per year, paid in full</span></div>`;
   let schedTxt='';
-  if(state.plan==='full')schedTxt=`<div class="row2"><span>Then</span><span>${money(p.annualList)} every year, starting ${fmtDate(addMonths(today,12))}</span></div>`;
-  if(state.plan==='monthly')schedTxt=`<div class="row2"><span>Then</span><span>${money2(p.schedule.per)} a month for 11 more months</span></div><div class="row2"><span>From ${fmtDate(addMonths(today,12))}</span><span>${money(p.annualList)} per year, paid in full</span></div>`;
-  if(state.plan==='quarterly')schedTxt=`<div class="row2"><span>Then</span><span>${money2(p.schedule.per)} every 3 months, 3 more times</span></div><div class="row2"><span>From ${fmtDate(addMonths(today,12))}</span><span>${money(p.annualList)} per year, paid in full</span></div>`;
-  if(state.plan==='split')schedTxt=p.schedule.rows.slice(1).map(r=>`<div class="row2"><span>${fmtDate(new Date(r.date+'T12:00:00'))}</span><span>${money2(r.amount)}</span></div>`).join('')+`<div class="row2"><span>From ${fmtDate(addMonths(new Date(state.split[0].date+'T12:00:00'),12))}</span><span>${money(p.annualList)} per year, paid in full</span></div>`;
+  if(state.plan==='full')schedTxt=`<div class="row2"><span>Then</span><span>${money(p.annualList)} every year, starting ${fmtISO(p.renews)}</span></div>`;
+  else if(p.rest&&state.plan==='monthly')schedTxt=`<div class="row2"><span>Then</span><span>${money2(p.rest.amount)} a month for ${p.rest.count} more months</span></div>`+renewRow;
+  else if(p.rest&&state.plan==='quarterly')schedTxt=`<div class="row2"><span>Then</span><span>${money2(p.rest.amount)} every 3 months, ${p.rest.count} more times</span></div>`+renewRow;
+  else schedTxt=pay.slice(1).map(x=>`<div class="row2"><span>${fmtISO(x.date)}</span><span>${money2(x.amount)}</span></div>`).join('')+renewRow;
   $('#pv-who').textContent=c?c.name:'the client';
   $('#pv-body').innerHTML=`
     <img class="logo" src="https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c69030ace6166590c7d808e_1200_80.webp" alt="RocketPlan">
@@ -516,7 +541,7 @@ function renderPreview(){
       ${p.disc?`<tr class="waived"><td colspan="3" class="r">Discount (first year only)</td><td class="r">−${money2(p.disc)}</td></tr>`:''}
       <tr class="tot"><td colspan="3" class="r">First-year total</td><td class="r">${money2(p.total)}</td></tr>
     </tfoot></table>
-    <div class="pay-box"><div class="big"><span>Pay today</span><span>${money2(firstCharge)}</span></div>${schedTxt}</div>
+    <div class="pay-box"><div class="big"><span>Pay today</span><span>${money2(firstCharge)}</span></div>${feeRow}${schedTxt}</div>
     <h2>Key Terms</h2>
     <ol class="terms">
       <li><b>Effective date and term.</b> The subscription starts on the date of your first payment and runs for 12 months.</li>

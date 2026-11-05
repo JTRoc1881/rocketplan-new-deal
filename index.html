@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta name="robots" content="noindex, nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your RocketPlan package</title><script src="/icons.js"></script><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your RocketPlan package</title><script src="/icons.js"></script><link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root{--purple:#9A00FF;--purple-2:#6D00E6;--purple-light:#F4E5FF;--ink:#1E0D47;--white:#fff;--bg:#F3F3F6;--border:#E8E7ED;--card-border:#D2CFDA;--muted:#777185;--icon:#5B476B;--green-dark:#007760;--green:#40C9AE;--green-light:#DCF5F0}
@@ -37,10 +37,15 @@ const LOGO='https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c6903
 let last='';
 function render(v){
   const sent=['sent','signed','paid'].includes(v.status);
-  const rows=v.lines.map(l=>`<div class="pr-row">${rpIcon(rpIconFor(l.name),40)}<div><div class="pr-n">${esc(l.name)}</div><div class="pr-d">${esc(l.desc)}</div></div><div class="pr-v">${money(l.unit)}<small>${l.every?'every '+l.every:'one time'}</small></div></div>`).join('');
-  const fee=v.lines.length&&v.fee?`<div class="pr-row">${rpIcon('fee',40)}<div><div class="pr-n">Set Up Fee${v.waive?' <span class="pr-tag">waived</span>':''}</div><div class="pr-d">One-time onboarding, account setup and training.</div></div><div class="pr-v">${money(v.fee)}<small>one time</small></div></div>`:'';
+  const rows=v.lines.map(l=>`<div class="pr-row">${rpIcon(rpIconFor(l.name),40)}<div><div class="pr-n">${esc(l.name)}</div><div class="pr-d">${esc(l.desc)}</div></div><div class="pr-v">${money2(l.unit)}<small>${l.every?'every '+l.every:'one time'}</small></div></div>`).join('');
+  const pay=v.payments||[],n=pay.length;
+  const fee=v.lines.length&&v.fee?`<div class="pr-row">${rpIcon('fee',40)}<div><div class="pr-n">Set Up Fee${v.waive?' <span class="pr-tag">waived</span>':''}</div><div class="pr-d">One-time onboarding, account setup and training.</div></div><div class="pr-v">${money2(v.fee)}<small>${v.waive?'one time':v.feeMode==='financed'?'spread across your '+n+' payments':n>1?'with your first payment':'one time'}</small></div></div>`:'';
   const plan={full:'Paid in full, renews yearly',split:'Split payments on agreed dates',quarterly:'4 quarterly payments',monthly:'12 monthly payments'}[v.plan];
-  const sched=v.split&&v.lines.length?`<div class="sched">${v.split.map((r,i)=>`<div><span>${i===0?'At signing':fmtDate(r.date)}</span><b>${money2(v.total*r.pct/100)}</b></div>`).join('')}</div>`:'';
+  // payment schedule: exact amounts and dates from the server, the same ones the invoice charges
+  const word={monthly:'monthly',quarterly:'quarterly'}[v.plan];
+  const sched=!v.lines.length||n<2?'':v.rest&&word
+    ?`<div class="sched"><div><span>At signing</span><b>${money2(pay[0].amount)}</b></div><div><span>Then ${v.rest.count} ${word} payments, ${fmtDate(pay[1].date)} to ${fmtDate(v.rest.lastDate)}</span><b>${money2(v.rest.amount)} each</b></div></div>`
+    :`<div class="sched">${pay.map((r,i)=>`<div><span>${i===0?'At signing':fmtDate(r.date)}</span><b>${money2(r.amount)}</b></div>`).join('')}</div>`;
   const steps=sent?`<div class="steps">
     <div class="step ${v.signedAt?'done':''}"><span class="n">${v.signedAt?'✓':'1'}</span><div><div class="t">Review and sign the order form</div><div class="d">${v.signedAt?'Signed. Thank you.':'We emailed it to you. Open it, tick the three confirmations and sign.'}</div></div>${v.signUrl&&!v.signedAt?`<a class="btn" href="${v.signUrl}" target="_blank" rel="noopener">Open the form</a>`:''}</div>
     <div class="step ${v.paidAt?'done':''}"><span class="n">${v.paidAt?'✓':'2'}</span><div><div class="t">Make your first payment</div><div class="d">${v.paidAt?'Received. Your subscription is active.':'Pay '+money2(v.todayAmount)+' by card. Later instalments and renewals charge the same card automatically.'}</div></div>${v.payUrl&&!v.paidAt?(v.signedAt?`<a class="btn" href="${v.payUrl}" target="_blank" rel="noopener">Pay now</a>`:`<span class="btn ghost" aria-disabled="true">After signing</span>`):''}</div>
