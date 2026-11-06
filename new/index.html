@@ -91,6 +91,7 @@ button,input,select{font:inherit;color:inherit}
 .seg input:focus-visible~.box{outline:2px solid var(--purple);outline-offset:2px}
 .seg .nm{font-weight:600;display:block}.seg .ds{font-size:12.5px;color:var(--muted);line-height:17px;display:block}
 .seg .amt{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap;text-align:right}.seg .amt small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.plan-hint{margin-bottom:10px;padding:10px 14px;border-radius:10px;background:var(--purple-light);border:1px solid var(--purple);font-size:13.5px;line-height:1.45}
 .talk-bar{margin-top:12px;display:flex;align-items:center;gap:10px}.talk-btn{border:1px solid var(--border);background:var(--white);padding:6px 12px;font-size:13px}.talk-btn[aria-expanded="true"]{background:var(--purple-light);border-color:var(--purple)}.talk-hint{font-size:12px;color:var(--muted)}.talk-l .talk-close{float:right;font-size:12px;padding:0 4px;text-transform:none;letter-spacing:0}
 .talk{margin-top:12px;padding:14px 16px 14px 18px;border-radius:10px;background:var(--bg);border-left:3px solid var(--purple)}.talk-l{font-size:11px;font-weight:600;letter-spacing:.02em;color:var(--purple)}.talk-q{margin-top:4px;font-size:15px;line-height:22px;font-style:italic;color:var(--ink)}.talk-s{margin-top:6px;font-size:12.5px;line-height:18px;color:var(--muted)}
 .plan-note{margin-top:10px;font-size:13px;line-height:19px;color:var(--icon)}.plan-note b{color:var(--ink);font-weight:600}
@@ -244,6 +245,7 @@ button,input,select{font:inherit;color:inherit}
 <section class="sec">
         <div class="lead"><span class="num" id="st3">04</span><div><h2>Plan</h2><p class="sub">How will the client pay the 12-month term?</p></div></div>
         <div>
+          <div class="plan-hint" id="plan-hint" hidden></div>
           <div class="seg" id="plans">
             <label><input type="radio" name="plan" value="full" checked><span class="box"></span><span><span class="nm">Paid in full</span><span class="ds">One payment at signing. Renews yearly.</span></span><span class="amt" id="amt-full"></span></label>
             <label><input type="radio" name="plan" value="split"><span class="box"></span><span><span class="nm">Split payments</span><span class="ds">Annual price on dates you choose.</span></span><span class="amt" id="amt-split"></span></label>
@@ -397,7 +399,8 @@ $('#plans').addEventListener('change',(e)=>{state.plan=e.target.value;render();
   if(state.plan==='split'){const sc=$('#sched');sc.scrollIntoView({block:'nearest',behavior:'smooth'});const f=sc.querySelector('input[type=date]:not([readonly])')||sc.querySelector('input[type=number]');if(f)setTimeout(()=>f.focus({preventScroll:true}),350);}});
 $('#fee-amt').addEventListener('input',(e)=>{state.fee=num(e.target.value);render();});$('#fee-amt').addEventListener('change',(e)=>fmtIn(e.target));
 $('#fee-waive').addEventListener('change',(e)=>{state.waive=e.target.checked;render();});
-$('#fee-fin').addEventListener('change',(e)=>{state.feeMode=e.target.checked?'financed':'upfront';render();});
+$('#fee-fin').addEventListener('change',(e)=>{state.feeMode=e.target.checked?'financed':'upfront';render();
+  if(e.target.checked&&!$('#plan-hint').hidden)$('#plan-hint').closest('section').scrollIntoView({block:'start',behavior:'smooth'});});
 $('#disc-type').addEventListener('change',(e)=>{state.discType=e.target.value;$('#disc-val').disabled=state.discType==='none';$('#disc-sym').textContent=state.discType==='pct'?'%':'$';if(state.discType==='none'){state.discVal=0;$('#disc-val').value='';}render();});
 $('#disc-val').addEventListener('input',(e)=>{state.discVal=num(e.target.value);render();});$('#disc-val').addEventListener('change',(e)=>{if(state.discType==='amt')fmtIn(e.target);});
 
@@ -436,9 +439,10 @@ function render(){
   // setup fee: helper text and the "spread it" switch
   const rpSel=p.sel.some(x=>x.family==='rp'),crmSel=p.sel.some(x=>x.family==='crm');
   $('#fee-sub').textContent=(state.waive?'One-time. Waived: the client still sees the line, with a matching credit.':p.feeMode==='financed'?`One-time, spread across the ${n} payments.`:n>1?'One-time, charged with the first payment.':'One-time, charged at signing.')+(rpSel&&crmSel&&state.fee<2500?' RocketPlan and RocketCRM together: consider $2,500 for both setups.':'');
-  const canFin=has&&!state.waive&&p.fee>0&&n>1;
-  $('#fee-fin').disabled=!canFin;$('#fee-fin').checked=p.feeMode==='financed';$('#fee-fin-row').classList.toggle('off',!canFin);
-  $('#fee-fin-sub').textContent=state.waive?'Nothing to spread: the fee is waived.':has&&n===1?(state.plan==='full'?'Paid in full is one payment. Pick Monthly, Quarterly or Split to spread the fee.':'Add a second payment to spread the fee.'):!has||!p.fee?'No interest. Blends the fee into every payment instead of charging it all with the first one.':p.feeMode==='financed'?`No interest. ${state.plan==='split'?'The fee follows the same shares as the split':'Adds '+money2(pay[1].fee)+' to each of the '+n+' payments'}, instead of ${money2(p.feeDue)} on the first.`:`No interest. Turn on to ${state.plan==='split'?'share the '+money2(p.feeDue)+' fee across the '+n+' payments':'add '+money2(p.feeDue/n)+' to each of the '+n+' payments'} instead of charging it all with the first one.`;
+  const canFin=!state.waive&&state.fee>0,wantFin=canFin&&state.feeMode==='financed',oneFin=wantFin&&has&&n===1;
+  $('#fee-fin').disabled=!canFin;$('#fee-fin').checked=wantFin;$('#fee-fin-row').classList.toggle('off',!canFin);
+  $('#plan-hint').hidden=!oneFin;$('#plan-hint').textContent=!oneFin?'':state.plan==='full'?'The setup fee is set to spread. Pick Split, Quarterly or Monthly: Paid in full is a single payment, so there is nothing to spread it across.':'The setup fee is set to spread. Add a second payment below to spread it.';
+  $('#fee-fin-sub').textContent=state.waive?'Nothing to spread: the fee is waived.':!state.fee?'Nothing to spread: there is no setup fee.':oneFin?(state.plan==='full'?'On. Now pick Split, Quarterly or Monthly under Plan: Paid in full is a single payment.':'On. Add a second payment under Plan to spread it.'):has&&n===1?(state.plan==='full'?'No interest. Turn on, then pick Split, Quarterly or Monthly under Plan.':'No interest. Turn on, then add a second payment under Plan.'):!has||!p.fee?'No interest. Blends the fee into every payment instead of charging it all with the first one.':p.feeMode==='financed'?`No interest. ${state.plan==='split'?'The fee follows the same shares as the split':'Adds '+money2(pay[1].fee)+' to each of the '+n+' payments'}, instead of ${money2(p.feeDue)} on the first.`:`No interest. Turn on to ${state.plan==='split'?'share the '+money2(p.feeDue)+' fee across the '+n+' payments':'add '+money2(p.feeDue/n)+' to each of the '+n+' payments'} instead of charging it all with the first one.`;
   $('#sched').classList.toggle('on',state.plan==='split');if(state.plan==='split')renderSched();
   const notes={full:'<b>One yearly recurring invoice.</b> The client pays the annual amount today; it renews automatically each year.',
     split:'<b>Custom dates at the annual price.</b> The first share is charged when they sign; the rest is charged automatically on the dates below. Renews at the annual list price in 12 months.',
