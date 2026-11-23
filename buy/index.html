@@ -1,0 +1,201 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Choose your RocketPlan package</title>
+<meta name="description" content="Pick your RocketPlan package, see the exact price, then sign and pay online.">
+<link rel="icon" type="image/png" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<script src="/icons.js"></script><script src="/pricing.js"></script>
+<style>
+:root{--purple:#9A00FF;--purple-2:#6D00E6;--purple-light:#F4E5FF;--purple-line:#E9D3FF;--ink:#1E0D47;--white:#fff;--bg:#F3F3F6;--border:#E8E7ED;--card-border:#D2CFDA;--muted:#777185;--icon:#5B476B;--green-dark:#007760;--green:#40C9AE;--green-light:#DCF5F0;--red:#C50000;--red-light:#FFF0F0}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/24px "IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:28px 20px 120px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}.top img{height:34px;display:block}.top span{font-size:14px;color:var(--muted)}
+h1{font-size:34px;line-height:40px;margin:0;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.lede{font-size:17px;line-height:26px;color:var(--muted);margin:8px 0 0;max-width:60ch}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:24px;align-items:start;margin-top:28px}
+.sec{background:var(--white);border:1px solid var(--card-border);border-radius:14px;padding:22px 22px 24px}.sec+.sec{margin-top:16px}
+.sec h2{font-size:20px;line-height:26px;margin:0;font-weight:700}.sec .sub{font-size:14px;line-height:20px;color:var(--muted);margin:4px 0 16px}
+.num{display:inline-flex;width:26px;height:26px;border-radius:999px;background:var(--purple-light);color:var(--purple);font-size:12px;font-weight:600;align-items:center;justify-content:center;margin-right:10px;vertical-align:2px;font-variant-numeric:tabular-nums}
+.tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.addons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.pick{position:relative;display:block;cursor:pointer}.pick input{position:absolute;opacity:0;pointer-events:none}
+.card{height:100%;border:1.5px solid var(--border);border-radius:12px;padding:16px;background:var(--white);transition:border-color .15s,background .15s,box-shadow .15s}
+.pick:hover .card{border-color:var(--card-border)}.pick input:checked+.card{border-color:var(--purple);background:#FCF8FF;box-shadow:0 0 0 3px var(--purple-light)}
+.pick input:focus-visible+.card{outline:2px solid var(--purple);outline-offset:2px}
+.card .hd{display:flex;align-items:center;gap:10px}.card .nm{font-size:18px;font-weight:600}.card .tick{margin-left:auto;width:22px;height:22px;border-radius:999px;border:1.5px solid var(--card-border);flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:transparent;font-size:13px;font-weight:700}
+.pick input:checked+.card .tick{background:var(--purple);border-color:var(--purple);color:#fff}
+.card .pr{margin-top:12px;font-size:24px;line-height:30px;font-weight:700;font-variant-numeric:tabular-nums}.card .pr small{font-size:13px;font-weight:400;color:var(--muted)}
+.card .alt{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}.card .inc{margin:10px 0 0;padding:0;list-style:none;font-size:13.5px;line-height:20px;color:var(--icon)}.card .inc li{padding-left:16px;position:relative}.card .inc li::before{content:"";position:absolute;left:2px;top:8px;width:5px;height:5px;border-radius:999px;background:var(--purple)}
+.plans{display:grid;gap:10px}.plan .card{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 16px}.plan .tick{margin:0}
+.plan .nm{font-size:16px;font-weight:600}.plan .ds{font-size:13.5px;color:var(--muted);line-height:19px}.plan .amt{text-align:right;font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}.plan .amt small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:20px;color:var(--icon);margin-top:14px;cursor:pointer}.check input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--purple);flex:0 0 auto}
+.check a{color:var(--purple);font-weight:600;text-decoration:none}.check a:hover{text-decoration:underline}
+.form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form .full{grid-column:1/-1}
+label.f{display:block;font-size:13px;font-weight:600;color:var(--icon)}label.f input{display:block;width:100%;margin-top:6px;height:44px;padding:0 12px;border:1px solid var(--card-border);border-radius:8px;font:inherit;color:var(--ink);background:var(--white)}
+label.f input:hover{background:#FCF8FF}label.f input:focus{outline:none;border-color:#9A00FF80;box-shadow:0 0 0 3px var(--purple-light)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.sum{position:sticky;top:20px;background:var(--white);border:1px solid var(--card-border);border-radius:14px;padding:22px}
+.sum .eyebrow{font-size:12px;font-weight:600;color:var(--purple);margin:0 0 4px}.sum h2{font-size:22px;margin:0 0 14px;font-weight:700}
+.line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:15px}.line .l small{display:block;font-size:12.5px;color:var(--muted);line-height:18px}.line .v{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty{padding:18px 0;color:var(--muted);font-size:15px}
+.tot{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:14px 0 4px}.tot .l{font-size:14px;color:var(--muted)}.tot .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.today{margin-top:12px;background:var(--purple-light);border:1px solid var(--purple-line);border-radius:12px;padding:14px 16px}.today .l{font-size:12px;font-weight:600;color:var(--purple)}.today .v{font-size:30px;line-height:38px;font-weight:700;color:var(--purple);font-variant-numeric:tabular-nums}.today .s{font-size:13.5px;line-height:20px;color:var(--icon)}
+.note{margin-top:12px;font-size:13.5px;line-height:20px;color:var(--icon);display:flex;gap:8px}.note::before{content:"";flex:0 0 auto;width:8px;height:8px;margin-top:6px;border-radius:999px;background:var(--green)}
+.btn{display:flex;width:100%;align-items:center;justify-content:center;height:50px;margin-top:16px;border:0;border-radius:10px;background:var(--purple);color:#fff;font:600 16px/1 "IBM Plex Sans",sans-serif;cursor:pointer;transition:background .15s}.btn:hover{background:var(--purple-2)}.btn:disabled{background:#CFC8DA;cursor:not-allowed}
+.next{margin-top:10px;font-size:13px;line-height:19px;color:var(--muted);text-align:center}
+.err{margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--red-light);color:var(--red);font-size:14px;line-height:20px}
+.foot{margin-top:28px;font-size:13px;color:var(--muted);text-align:center}.foot a{color:var(--purple);font-weight:600;text-decoration:none}
+.bar{display:none}
+.fail{max-width:560px;margin:80px auto;padding:0 20px;text-align:center;color:var(--muted);font-size:17px}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.sum{position:static}.tiers{grid-template-columns:minmax(0,1fr)}
+  .bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--white);border-top:1px solid var(--card-border);box-shadow:0 -6px 20px rgba(30,13,71,.08)}
+  .bar .l{font-size:12px;color:var(--muted)}.bar .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}.bar a{display:inline-flex;align-items:center;height:44px;padding:0 18px;border-radius:10px;background:var(--purple);color:#fff;font-weight:600;text-decoration:none}}
+@media (max-width:560px){h1{font-size:28px;line-height:34px}.addons,.form{grid-template-columns:minmax(0,1fr)}.sec{padding:18px 16px 20px}.plan .card{grid-template-columns:auto 1fr;}.plan .amt{grid-column:2;text-align:left}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div class="wrap" id="root">
+  <div class="top"><img src="https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c69030ace6166590c7d808e_1200_80.webp" alt="RocketPlan"><span id="rep"></span></div>
+  <h1>Choose your RocketPlan package</h1>
+  <p class="lede">Pick what fits your team and see the exact price. Every package is a 12-month subscription.</p>
+  <div class="grid">
+    <form id="form" novalidate>
+      <section class="sec"><h2><span class="num">1</span>RocketPlan</h2><p class="sub">Job documentation for restoration teams. Choose the size of your team.</p><div class="tiers" id="tiers"></div></section>
+      <section class="sec"><h2><span class="num">2</span>Add-ons</h2><p class="sub">Optional. Add either one, or buy them without RocketPlan.</p><div class="addons" id="addons"></div></section>
+      <section class="sec"><h2><span class="num">3</span>How you would like to pay</h2><p class="sub" id="plan-sub">Paying in full is the lowest price. Quarterly and monthly payments cost 20% more.</p>
+        <div class="plans" id="plans"></div>
+        <label class="check" id="spread-row" hidden><input type="checkbox" id="spread"><span id="spread-txt">Spread the setup fee across my payments instead of paying it all today. No interest.</span></label>
+      </section>
+      <section class="sec"><h2><span class="num">4</span>Your details</h2><p class="sub">We use these for your order form and your account.</p>
+        <div class="form">
+          <label class="f">First name<input id="firstName" autocomplete="given-name" required></label>
+          <label class="f">Last name<input id="lastName" autocomplete="family-name" required></label>
+          <label class="f full">Company<input id="company" autocomplete="organization" required></label>
+          <label class="f">Work email<input id="email" type="email" autocomplete="email" inputmode="email" required></label>
+          <label class="f">Mobile number<input id="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(555) 555-0100" required></label>
+        </div>
+        <div class="hp" aria-hidden="true"><label>Website<input id="website" tabindex="-1" autocomplete="off"></label></div>
+        <label class="check"><input type="checkbox" id="agree"><span>I agree to the RocketPlan <a href="https://rocketplantech.com/terms-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="https://rocketplantech.com/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a>, and that my subscription renews automatically each year at the list price until I cancel.</span></label>
+      </section>
+    </form>
+    <aside class="sum" id="summary">
+      <p class="eyebrow">Your order</p><h2>Summary</h2>
+      <div id="lines"><div class="empty">Pick a package to see your price.</div></div>
+      <div id="money" hidden>
+        <div class="tot"><span class="l" id="tot-l">First-year total</span><span class="v" id="tot-v"></span></div>
+        <div class="today"><div class="l">Due today</div><div class="v" id="today-v"></div><div class="s" id="today-s"></div></div>
+        <div class="note" id="renew"></div>
+      </div>
+      <button class="btn" id="go" type="button" disabled>Continue to sign and pay</button>
+      <div class="err" id="err" role="alert" hidden></div>
+      <p class="next">Next you review and sign your order form, then pay by card. Nothing is charged on this page.</p>
+    </aside>
+  </div>
+  <p class="foot">RocketPlan Technologies Inc. · <a href="https://rocketplantech.com/terms-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a> · <a href="https://rocketplantech.com/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a></p>
+</div>
+<div class="bar" id="bar" hidden><div><div class="l">Due today</div><div class="v" id="bar-v"></div></div><a href="#summary">Review order</a></div>
+<script>
+const API='https://irrxupzubigjytxeeapu.supabase.co/functions/v1/new-deal';
+const $=s=>document.querySelector(s),Q=new URLSearchParams(location.search);
+const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+const money2=n=>Math.abs(n-Math.round(n))<0.005?money(n):'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtDate=iso=>new Date(iso+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const todayISO=()=>new Date().toLocaleDateString('en-CA',{timeZone:'America/Vancouver'});
+const REP=(Q.get('rep')||'').replace(/[^\p{L}\p{N} .'-]/gu,'').trim().slice(0,40);
+let PACKAGES=[],PLANS=['full','quarterly','monthly'],FEE={base:1500,rocketPlanWithCrm:2500};
+const state={tier:null,addons:new Set(),plan:'full',spread:false,busy:false};
+
+const ids=()=>[...(state.tier?[state.tier]:[]),...state.addons];
+const feeFor=(list)=>{const fam=new Set(PACKAGES.filter(p=>list.includes(p.id)).map(p=>p.family));return fam.has('rp')&&fam.has('crm')?FEE.rocketPlanWithCrm:FEE.base;};
+const dealFor=(plan)=>{const list=ids();return {packages:list,override:{},desc:{},plan,fee:feeFor(list),waive:false,feeMode:state.spread&&plan!=='full'?'financed':'upfront',discType:'none',discVal:0,split:[]};};
+const priced=(plan)=>RP_PRICING.compute(PACKAGES,dealFor(plan),todayISO());
+
+function card(p,type){
+  const inc=String(p.inc||'').split('. ').map(x=>x.trim().replace(/\.$/,'')).filter(Boolean);
+  return `<label class="pick"><input type="${type}" name="${type==='radio'?'tier':'addon'}" value="${p.id}"><div class="card">
+    <div class="hd">${rpIcon(rpIconFor(p.name),36)}<span class="nm">${esc(p.name)}</span><span class="tick" aria-hidden="true">✓</span></div>
+    <div class="pr">${money(p.annual)} <small>per year</small></div>
+    <div class="alt">or ${money(RP_PRICING.monthly(p.annual))} a month for 12 months</div>
+    <ul class="inc">${inc.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></label>`;
+}
+const PLAN_TEXT={full:['Pay in full','One payment today. The lowest price.'],quarterly:['Quarterly','4 payments, one every 3 months.'],monthly:['Monthly','12 payments, one a month.']};
+function planRow(k){
+  return `<label class="pick plan"><input type="radio" name="plan" value="${k}"${state.plan===k?' checked':''}><div class="card"><span class="tick" aria-hidden="true">✓</span>
+    <div><div class="nm">${PLAN_TEXT[k][0]}${k==='full'?'<span class="tag">Best price</span>':''}</div><div class="ds">${PLAN_TEXT[k][1]}</div></div><div class="amt" id="amt-${k}"></div></div></label>`;
+}
+
+function render(){
+  const list=ids(),has=list.length>0;
+  const p=has?priced(state.plan):null;
+  // plan rows: what each way of paying really costs for this selection
+  for(const k of PLANS){const el=$('#amt-'+k);if(!el)continue;
+    if(!has){el.innerHTML='';continue;}
+    const a=priced(k);
+    el.innerHTML=k==='full'?`${money2(a.total)}<small>today</small>`:a.rest&&Math.abs(a.payments[0].amount-a.rest.amount)<1?`${money2(a.rest.amount)}<small>× ${a.count}</small>`:`${money2(a.rest.amount)}<small>× ${a.count} · first ${money2(a.payments[0].amount)}</small>`;}
+  const multi=state.plan!=='full';
+  $('#spread-row').hidden=!(has&&multi);$('#spread').checked=state.spread;
+  if(has&&multi){const f=p.fee,n=p.count;$('#spread-txt').textContent=state.spread?`Setup fee spread across my ${n} payments (${money2(f/n)} in each). No interest.`:`Spread the ${money(f)} setup fee across my ${n} payments instead of paying it all today. No interest.`;}
+  // summary
+  if(!has){$('#lines').innerHTML='<div class="empty">Pick a package to see your price.</div>';$('#money').hidden=true;$('#bar').hidden=true;}
+  else{
+    const per=state.plan==='monthly'?'month':state.plan==='quarterly'?'quarter':'year',times=state.plan==='monthly'?' × 12':state.plan==='quarterly'?' × 4':'';
+    let h=p.lines.map(l=>`<div class="line"><span class="l">${esc(l.pkg.name)}<small>${money(l.per)} / ${per}${times}</small></span><span class="v">${money2(l.lineAmount)}</span></div>`).join('');
+    const n=p.count;
+    h+=`<div class="line"><span class="l">Set Up Fee<small>one time · onboarding, account setup and training${n>1?(p.feeMode==='financed'?' · spread over '+n+' payments':' · with your first payment'):''}</small></span><span class="v">${money2(p.fee)}</span></div>`;
+    $('#lines').innerHTML=h;$('#money').hidden=false;
+    $('#tot-l').textContent=n>1?`First-year total (${n} payments)`:'First-year total';$('#tot-v').textContent=money2(p.total);
+    $('#today-v').textContent=money2(p.today);$('#bar-v').textContent=money2(p.today);$('#bar').hidden=false;
+    const word={monthly:'monthly',quarterly:'quarterly'}[state.plan];
+    $('#today-s').textContent=n===1?'One payment for your first year, setup included.':p.rest?`Then ${p.rest.count} ${word} payments of ${money2(p.rest.amount)}, from ${fmtDate(p.payments[1].date)} to ${fmtDate(p.rest.lastDate)}, charged to the same card.`:'';
+    $('#renew').innerHTML=`<span>Renews <b>${fmtDate(p.renews)}</b> at <b>${money(p.annualList)} a year</b>, charged to the same card. Cancel any time before then.</span>`;
+  }
+  $('#go').disabled=!has||state.busy;$('#go').textContent=state.busy?'Creating your order…':'Continue to sign and pay';
+}
+
+function fail(msg){const e=$('#err');e.textContent=msg;e.hidden=false;e.scrollIntoView({block:'nearest',behavior:'smooth'});}
+function check(){
+  const v=id=>$('#'+id).value.trim();
+  if(!ids().length)return 'Pick at least one package.';
+  if(!v('firstName')||!v('lastName'))return 'Enter your first and last name.';
+  if(!v('company'))return 'Enter your company name.';
+  if(!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(v('email')))return 'Enter a valid email address.';
+  const d=v('phone').replace(/\D/g,'');if(!(d.length===10||(d.length===11&&d[0]==='1')||(v('phone').startsWith('+')&&d.length>=10&&d.length<=15)))return 'Enter a mobile number with its area code.';
+  if(!$('#agree').checked)return 'Tick the box to agree to the terms.';
+  return '';
+}
+async function submit(){
+  if(state.busy)return;
+  const problem=check();if(problem){fail(problem);return;}
+  $('#err').hidden=true;state.busy=true;render();
+  const v=id=>$('#'+id).value.trim();
+  try{
+    const r=await fetch(API+'/api/shop/order',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({packages:ids(),plan:state.plan,feeMode:state.spread&&state.plan!=='full'?'financed':'upfront',firstName:v('firstName'),lastName:v('lastName'),company:v('company'),email:v('email'),phone:v('phone'),website:v('website'),agree:$('#agree').checked,rep:REP})});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||!j.link)throw new Error(j.error||'We could not create your order. Please try again.');
+    const leave=()=>{location.href=j.link;};
+    if(window.rpLaunch&&!matchMedia('(prefers-reduced-motion:reduce)').matches){let gone=false;const once=()=>{if(!gone){gone=true;leave();}};try{rpLaunch($('#go'),once);}catch(e){once();}setTimeout(once,2500);}else leave();
+  }catch(e){state.busy=false;render();fail(e.message==='Failed to fetch'?'We could not reach RocketPlan. Check your connection and try again.':e.message);}
+}
+
+fetch(API+'/api/shop').then(r=>{if(!r.ok)throw new Error('unavailable');return r.json();}).then(c=>{
+  PACKAGES=c.packages;if(Array.isArray(c.plans)&&c.plans.length)PLANS=c.plans;if(c.fee)FEE=c.fee;
+  if(REP)$('#rep').textContent='Prepared by '+REP;
+  $('#tiers').innerHTML=PACKAGES.filter(p=>p.family==='rp').map(p=>card(p,'radio')).join('');
+  $('#addons').innerHTML=PACKAGES.filter(p=>p.family!=='rp').map(p=>card(p,'checkbox')).join('');
+  $('#plans').innerHTML=PLANS.map(planRow).join('');
+  // a shared link can arrive with a package already picked: ?p=stars,crm&plan=monthly
+  const want=(Q.get('p')||'').split(',').map(x=>x.trim()).filter(Boolean);
+  for(const p of PACKAGES){if(!want.includes(p.id))continue;if(p.family==='rp')state.tier=p.id;else state.addons.add(p.id);}
+  if(PLANS.includes(Q.get('plan')))state.plan=Q.get('plan');
+  for(const i of document.querySelectorAll('input[name=tier]'))i.checked=i.value===state.tier;
+  for(const i of document.querySelectorAll('input[name=addon]'))i.checked=state.addons.has(i.value);
+  for(const i of document.querySelectorAll('input[name=plan]'))i.checked=i.value===state.plan;
+  // a tier is a radio that can be switched off again, so the add-ons can be bought on their own
+  $('#tiers').addEventListener('click',e=>{const i=e.target.closest('input[name=tier]');if(!i)return;if(state.tier===i.value){i.checked=false;state.tier=null;}else state.tier=i.value;render();});
+  $('#addons').addEventListener('change',e=>{const i=e.target;if(i.name!=='addon')return;if(i.checked)state.addons.add(i.value);else state.addons.delete(i.value);render();});
+  $('#plans').addEventListener('change',e=>{if(e.target.name==='plan'){state.plan=e.target.value;render();}});
+  $('#spread').addEventListener('change',e=>{state.spread=e.target.checked;render();});
+  $('#go').addEventListener('click',submit);
+  $('#form').addEventListener('submit',e=>{e.preventDefault();submit();});
+  render();
+}).catch(()=>{$('#root').innerHTML='<p class="fail">This page could not load the RocketPlan packages. Please refresh, or contact RocketPlan and we will set your order up for you.</p>';});
+</script></body></html>
