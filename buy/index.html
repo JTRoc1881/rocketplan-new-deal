@@ -28,7 +28,8 @@ h1{font-size:34px;line-height:40px;margin:0;font-weight:700;letter-spacing:-.01e
 .plan .nm{font-size:16px;font-weight:600}.plan .ds{font-size:13.5px;color:var(--muted);line-height:19px}.plan .amt{text-align:right;font-weight:700;font-size:17px;font-variant-numeric:tabular-nums;white-space:nowrap}.plan .amt small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
 .tag{display:inline-block;font-size:12px;font-weight:600;color:var(--green-dark);background:var(--green-light);padding:1px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}
 .check{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:20px;color:var(--icon);margin-top:14px;cursor:pointer}.check input{width:18px;height:18px;margin:1px 0 0;accent-color:var(--purple);flex:0 0 auto}
-.check a{color:var(--purple);font-weight:600;text-decoration:none}.check a:hover{text-decoration:underline}
+.check a,.terms a{color:var(--purple);font-weight:600;text-decoration:none}.check a:hover,.terms a:hover{text-decoration:underline}
+.terms{font-size:14px;line-height:20px;color:var(--icon);margin:14px 0 0}
 .form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form .full{grid-column:1/-1}
 label.f{display:block;font-size:13px;font-weight:600;color:var(--icon)}label.f input{display:block;width:100%;margin-top:6px;height:44px;padding:0 12px;border:1px solid var(--card-border);border-radius:8px;font:inherit;color:var(--ink);background:var(--white)}
 label.f input:hover{background:#FCF8FF}label.f input:focus{outline:none;border-color:#9A00FF80;box-shadow:0 0 0 3px var(--purple-light)}
@@ -68,12 +69,13 @@ label.f input:hover{background:#FCF8FF}label.f input:focus{outline:none;border-c
         <div class="form">
           <label class="f">First name<input id="firstName" autocomplete="given-name" required></label>
           <label class="f">Last name<input id="lastName" autocomplete="family-name" required></label>
-          <label class="f full">Company<input id="company" autocomplete="organization" required></label>
+          <label class="f">Company<input id="company" autocomplete="organization" required></label>
+          <label class="f">Your title<input id="title" autocomplete="organization-title" placeholder="For example: Owner" required></label>
           <label class="f">Work email<input id="email" type="email" autocomplete="email" inputmode="email" required></label>
           <label class="f">Mobile number<input id="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(555) 555-0100" required></label>
         </div>
         <div class="hp" aria-hidden="true"><label>Website<input id="website" tabindex="-1" autocomplete="off"></label></div>
-        <label class="check"><input type="checkbox" id="agree"><span>I agree to the RocketPlan <a href="https://rocketplantech.com/terms-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="https://rocketplantech.com/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a>, and that my subscription renews automatically each year at the list price until I cancel.</span></label>
+        <p class="terms">These details go straight onto your order form, so you only tick the confirmations and sign. The order is under the RocketPlan <a href="https://rocketplantech.com/terms-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="https://rocketplantech.com/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a>, which you confirm on the form.</p>
       </section>
     </form>
     <aside class="sum" id="summary">
@@ -157,9 +159,9 @@ function check(){
   if(!ids().length)return 'Pick at least one package.';
   if(!v('firstName')||!v('lastName'))return 'Enter your first and last name.';
   if(!v('company'))return 'Enter your company name.';
+  if(!v('title'))return 'Enter your title, for example Owner.';
   if(!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(v('email')))return 'Enter a valid email address.';
   const d=v('phone').replace(/\D/g,'');if(!(d.length===10||(d.length===11&&d[0]==='1')||(v('phone').startsWith('+')&&d.length>=10&&d.length<=15)))return 'Enter a mobile number with its area code.';
-  if(!$('#agree').checked)return 'Tick the box to agree to the terms.';
   return '';
 }
 async function submit(){
@@ -168,7 +170,7 @@ async function submit(){
   $('#err').hidden=true;state.busy=true;render();
   const v=id=>$('#'+id).value.trim();
   try{
-    const r=await fetch(API+'/api/shop/order',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({packages:ids(),plan:state.plan,feeMode:state.spread&&state.plan!=='full'?'financed':'upfront',firstName:v('firstName'),lastName:v('lastName'),company:v('company'),email:v('email'),phone:v('phone'),website:v('website'),agree:$('#agree').checked,rep:REP})});
+    const r=await fetch(API+'/api/shop/order',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({packages:ids(),plan:state.plan,feeMode:state.spread&&state.plan!=='full'?'financed':'upfront',firstName:v('firstName'),lastName:v('lastName'),company:v('company'),title:v('title'),email:v('email'),phone:v('phone'),website:v('website'),rep:REP})});
     const j=await r.json().catch(()=>({}));
     if(!r.ok||!j.link)throw new Error(j.error||'We could not create your order. Please try again.');
     const leave=()=>{location.href=j.link;};
