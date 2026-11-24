@@ -9,8 +9,9 @@
 // The model (all amounts in USD):
 //   subscription S   sum over the packages of the first-year amount for the chosen plan
 //                    full, split:  the annual price (list, or the rep's deal price)
+//                    quarterly:    round(annual x 1.1 / 4) x 4    (10% more than paying in full)
 //                    monthly:      round(annual / 10) x 12        (20% more than paying in full)
-//                    quarterly:    round(annual / 10) x 3 x 4
+//                    The order is deliberate: paying in full is cheapest, then quarterly, then monthly.
 //   discount D       on the subscription only, first year only: a percent of S, or an amount capped at S
 //   setup fee F      one-time. Waived: the line stays at F with a matching credit W = F, so nothing is due for it
 //   total T          S - D + F - W                 (the invoice: lines S + F, invoice discount D + W)
@@ -29,7 +30,7 @@
 
   function toCents(n) { return Math.round((Number(n) || 0) * 100); }
   function monthly(annual) { return Math.round((Number(annual) || 0) / 10); }
-  function quarterly(annual) { return monthly(annual) * 3; }
+  function quarterly(annual) { return Math.round((Number(annual) || 0) * 11 / 40); } // annual x 1.1, in 4 payments
 
   // Calendar months, keeping the day of the month where it exists (Jan 31 + 1 month = Feb 28/29).
   function addMonthsISO(iso, n) {

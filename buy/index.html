@@ -81,7 +81,7 @@ label.f.bad input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-light)}
     <div class="view" id="choose">
       <section class="sec"><h2>RocketPlan</h2><p class="sub">Job documentation for restoration teams. Choose the size of your team.</p><div class="tiers" id="tiers"></div></section>
       <section class="sec"><h2>Add-ons</h2><p class="sub">Optional. Add either one, or buy them without RocketPlan.</p><div class="addons" id="addons"></div></section>
-      <section class="sec"><h2>How you would like to pay</h2><p class="sub">Paying in full is the lowest price. Quarterly and monthly payments cost 20% more.</p>
+      <section class="sec"><h2>How you would like to pay</h2><p class="sub">Paying in full is the lowest price. Quarterly costs 10% more and monthly costs 20% more.</p>
         <div class="plans" id="plans"></div>
         <label class="check" id="spread-row" hidden><input type="checkbox" id="spread"><span id="spread-txt"></span></label>
       </section>
@@ -155,19 +155,22 @@ function card(p,type){
     <div class="alt">or ${money(RP_PRICING.monthly(p.annual))} a month for 12 months</div>
     <ul class="inc">${inc.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></label>`;
 }
-const PLAN_TEXT={full:['Pay in full','One payment today. The lowest price.'],quarterly:['Quarterly','4 payments, one every 3 months.'],monthly:['Monthly','12 payments, one a month.']};
+const PLAN_TEXT={full:['Pay in full','One payment today. The lowest price.'],quarterly:['Quarterly','4 payments, one every 3 months. Costs 10% more.'],monthly:['Monthly','12 payments, one a month. Costs 20% more.']};
 function planRow(k){
   return `<label class="pick plan"><input type="radio" name="plan" value="${k}"${state.plan===k?' checked':''}><div class="card"><span class="tick" aria-hidden="true">✓</span>
-    <div><div class="nm">${PLAN_TEXT[k][0]}${k==='full'?'<span class="tag">Best price</span>':''}</div><div class="ds">${PLAN_TEXT[k][1]}</div></div><div class="amt" id="amt-${k}"></div></div></label>`;
+    <div><div class="nm">${PLAN_TEXT[k][0]}${k==='full'?'<span class="tag">Best price</span>':''}</div><div class="ds" id="ds-${k}">${PLAN_TEXT[k][1]}</div></div><div class="amt" id="amt-${k}"></div></div></label>`;
 }
 
 function render(){
   const list=ids(),has=list.length>0,review=state.step==='review';
   const p=has?priced(state.plan):null;
   // plan rows: what each way of paying really costs for this selection
+  const fullSub=has?priced('full').subscription:0,most=has?Math.max(...PLANS.map(k=>priced(k).subscription)):0;
   for(const k of PLANS){const el=$('#amt-'+k);if(!el)continue;
-    if(!has){el.innerHTML='';continue;}
-    const a=priced(k);
+    const ds=$('#ds-'+k);
+    if(!has){el.innerHTML='';ds.textContent=PLAN_TEXT[k][1];continue;}
+    const a=priced(k),more=a.subscription-fullSub;
+    ds.textContent=k==='full'?(most>fullSub?`One payment today. You save ${money(most-fullSub)} compared with paying monthly.`:PLAN_TEXT.full[1]):`${k==='quarterly'?'4 payments, one every 3 months.':'12 payments, one a month.'} Costs ${money(more)} more over the year.`;
     el.innerHTML=k==='full'?`${money2(a.total)}<small>today</small>`:a.rest&&Math.abs(a.payments[0].amount-a.rest.amount)<1?`${money2(a.rest.amount)}<small>× ${a.count}</small>`:`${money2(a.rest.amount)}<small>× ${a.count} · first ${money2(a.payments[0].amount)}</small>`;}
   const multi=state.plan!=='full';
   $('#spread-row').hidden=!(has&&multi);$('#spread').checked=state.spread;

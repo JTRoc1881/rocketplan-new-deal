@@ -327,8 +327,9 @@ const money=(n)=>'$'+Math.round(n).toLocaleString('en-US');
 const money2=(n)=>Math.abs(n-Math.round(n))<0.005?money(n):'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const num=(v)=>+String(v).replace(/[^0-9.]/g,'')||0;
 const fmtIn=(el)=>{el.value=Math.round(num(el.value)).toLocaleString('en-US');};
-const monthly=(annual)=>Math.round(annual/10);
-const quarterly=(annual)=>monthly(annual)*3;
+// plan rates come from pricing.js, the one place the money math lives
+const monthly=(annual)=>RP_PRICING.monthly(annual);
+const quarterly=(annual)=>RP_PRICING.quarterly(annual);
 // annual price actually used for a package = override when set, else list
 const usedAnnual=(state,p)=>state.override[p.id]!=null?state.override[p.id]:p.annual;
 const usedDesc=(state,p)=>(state.desc[p.id]??p.inc).trim();
@@ -446,14 +447,14 @@ function render(){
   $('#sched').classList.toggle('on',state.plan==='split');if(state.plan==='split')renderSched();
   const notes={full:'<b>One yearly recurring invoice.</b> The client pays the annual amount today; it renews automatically each year.',
     split:'<b>Custom dates at the annual price.</b> The first share is charged when they sign; the rest is charged automatically on the dates below. Renews at the annual list price in 12 months.',
-    quarterly:'<b>4 quarterly payments, then annual.</b> Three months of the monthly rate per payment. At month 12 the subscription renews at the annual list price, paid in full.',
-    monthly:'<b>12 monthly payments, then annual.</b> Annual ÷ 10 per month. At month 12 the subscription renews at the annual list price, paid in full.'};
+    quarterly:'<b>4 quarterly payments, then annual.</b> 10% more than paying in full, so it is the cheaper way to spread the year. At month 12 the subscription renews at the annual list price, paid in full.',
+    monthly:'<b>12 monthly payments, then annual.</b> 20% more than paying in full (annual ÷ 10 per month), the most expensive way to pay. At month 12 the subscription renews at the annual list price, paid in full.'};
   $('#plan-note').innerHTML=notes[state.plan];
   $('#talk-bar').hidden=!has;if(!has){talkOpen=false;}const talk=$('#talk');talk.hidden=!(has&&talkOpen);$('#talk-toggle').setAttribute('aria-expanded',String(has&&talkOpen));
   if(has){
     const m=money2((state.plan==='monthly'?p:alt('monthly')).rest.amount),q=money2((state.plan==='quarterly'?p:alt('quarterly')).rest.amount);
     const fin=p.feeMode==='financed',feeUp=p.feeDue>0&&!fin;
-    const t={full:[`“We can also finance this over the year at no interest. Would ${m} a month or ${q} a quarter work better for your cash flow?”`,`Use this if the client hesitates on the price. Same 12-month term, no interest. If they say yes, pick Quarterly or Monthly above.`],
+    const t={full:[`“We can also finance this over the year at no interest. Would ${m} a month or ${q} a quarter work better for your cash flow?”`,`Use this if the client hesitates on the price. Same 12-month term. Offer quarterly first: it costs 10% more than paying in full, monthly costs 20% more. If they say yes, pick Quarterly or Monthly above.`],
       split:[`“No interest on this. Let's put the first payment today and spread the rest on dates that suit you.”`,`Set the shares and dates below. The first share is charged when they sign.${feeUp?' The setup fee is added to the first payment.':fin?' The setup fee follows the same shares.':''}`],
       quarterly:[fin?`“That's four payments of ${q}, setup included, no interest, and it renews at the annual rate next year.”`:`“That's four payments of ${q}, no interest, and it renews at the annual rate next year.”`,fin?`All four payments are the same. The first is charged at signing; the next three are automatic.`:feeUp?`The first quarter plus the setup fee (${money2(p.today)}) is charged at signing; the next three are automatic.`:`The first quarter is charged at signing; the next three are automatic.`],
       monthly:[fin?`“That's ${m} a month for 12 months, setup included, no interest. Next year it renews at the annual rate.”`:`“That's ${m} a month, no interest, for 12 months. Next year it renews at the annual rate.”`,fin?`All 12 payments are the same. The first is charged at signing; the other 11 are automatic.`:feeUp?`Month one plus the setup fee (${money2(p.today)}) is charged at signing; the other 11 are automatic.`:`Month one is charged at signing; the other 11 are automatic.`]}[state.plan];
