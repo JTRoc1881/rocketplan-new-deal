@@ -139,7 +139,7 @@ const REP=(Q.get('rep')||'').replace(/[^\p{L}\p{N} .'-]/gu,'').trim().slice(0,40
 // a personal link names a RocketCRM contact (?for=<contact id>), so that customer types nothing
 const FOR=/^[A-Za-z0-9]{16,32}$/.test(Q.get('for')||'')?Q.get('for'):'';
 let PACKAGES=[],PLANS=['full','quarterly','monthly'],FEE={base:1500,rocketPlanWithAddOn:2500};
-const state={tier:null,addons:new Set(),plan:'full',spread:false,busy:false,step:'choose',known:null,statements:null};
+const state={tier:null,addons:new Set(),plan:'full',spread:false,busy:false,step:'choose',known:null,statements:null,summary:null};
 
 const ids=()=>[...(state.tier?[state.tier]:[]),...state.addons];
 const feeFor=(list)=>{const fam=new Set(PACKAGES.filter(p=>list.includes(p.id)).map(p=>p.family));return fam.has('rp')&&(fam.has('crm')||fam.has('ai'))?(FEE.rocketPlanWithAddOn||FEE.rocketPlanWithCrm):FEE.base;};
@@ -196,12 +196,9 @@ function render(){
 // the review screen: who is ordering, the agreement in plain words, the two confirmations
 function linked(t){return esc(t).replace('Terms &amp; Conditions',`<a href="${TERMS}" target="_blank" rel="noopener">Terms &amp; Conditions</a>`).replace('Privacy Policy',`<a href="${PRIVACY}" target="_blank" rel="noopener">Privacy Policy</a>`);}
 function renderReview(p,word){
-  const n=p.count;
-  const pay=n===1?`<b>${money2(p.today)}</b> today, in one payment.`:p.rest?`<b>${money2(p.today)}</b> today, then ${p.rest.count} ${word} payments of <b>${money2(p.rest.amount)}</b>, the last on ${fmtDate(p.rest.lastDate)}. Charged to the same card automatically.`:p.payments.map((x,i)=>`<b>${money2(x.amount)}</b> ${i?'on '+fmtDate(x.date):'today'}`).join(', ')+'.';
-  $('#agree-terms').innerHTML=`<dt>Subscription</dt><dd>12 months, starting today, ${fmtDate(todayISO())}.</dd>
-    <dt>Payments</dt><dd>${pay}</dd>
-    <dt>Renewal</dt><dd>Renews automatically on <b>${fmtDate(p.renews)}</b> at the list price then, today <b>${money(p.annualList)}</b> a year.</dd>
-    <dt>Cancelling</dt><dd>Any time by written notice, effective at the end of the current term. Fees are non-refundable.</dd>
+  // the agreement rows come from the server, word for word, so the order record holds exactly what was shown
+  const bold=t=>linked(t).replace(/\$\d+(?:,\d{3})*(?:\.\d\d)?/g,'<b>$&</b>');
+  $('#agree-terms').innerHTML=(state.summary||[]).map(r=>`<dt>${esc(r.label)}</dt><dd>${bold(r.text)}</dd>`).join('')+`
     <dt>Full terms</dt><dd><a href="${TERMS}" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="${PRIVACY}" target="_blank" rel="noopener">Privacy Policy</a></dd>`;
   const s=state.statements||[];$('#agree-txt').innerHTML=linked(s[0]||'');$('#authorize-txt').innerHTML=linked(s[1]||'');
   $('#secure-txt').textContent=`Next: secure card payment of ${money2(p.today)}. Nothing is charged on this page.`;
@@ -230,8 +227,8 @@ const offline=e=>e.message==='Failed to fetch'||e.message==='Load failed'?'We co
 async function goReview(){
   if(state.busy||!ids().length)return;
   $('#err').hidden=true;state.busy=true;render();
-  try{const j=await post({dry:true});if(!Array.isArray(j.statements)||j.statements.length<2)throw new Error('We could not prepare your order. Please try again.');
-    state.statements=j.statements;state.busy=false;state.step='review';$('#agree').checked=false;$('#authorize').checked=false;$('#err2').hidden=true;$('#ticks').classList.remove('bad');
+  try{const j=await post({dry:true});if(!Array.isArray(j.statements)||j.statements.length<2||!Array.isArray(j.summary)||!j.summary.length)throw new Error('We could not prepare your order. Please try again.');
+    state.statements=j.statements;state.summary=j.summary;state.busy=false;state.step='review';$('#agree').checked=false;$('#authorize').checked=false;$('#err2').hidden=true;$('#ticks').classList.remove('bad');
     history.pushState({step:'review'},'','#review');show();
   }catch(e){state.busy=false;render();fail(offline(e),'#err');}
 }
