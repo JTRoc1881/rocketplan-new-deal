@@ -138,11 +138,11 @@ const todayISO=()=>new Date().toLocaleDateString('en-CA',{timeZone:'America/Vanc
 const REP=(Q.get('rep')||'').replace(/[^\p{L}\p{N} .'-]/gu,'').trim().slice(0,40);
 // a personal link names a RocketCRM contact (?for=<contact id>), so that customer types nothing
 const FOR=/^[A-Za-z0-9]{16,32}$/.test(Q.get('for')||'')?Q.get('for'):'';
-let PACKAGES=[],PLANS=['full','quarterly','monthly'],FEE={base:1500,rocketPlanWithCrm:2500};
+let PACKAGES=[],PLANS=['full','quarterly','monthly'],FEE={base:1500,rocketPlanWithAddOn:2500};
 const state={tier:null,addons:new Set(),plan:'full',spread:false,busy:false,step:'choose',known:null,statements:null};
 
 const ids=()=>[...(state.tier?[state.tier]:[]),...state.addons];
-const feeFor=(list)=>{const fam=new Set(PACKAGES.filter(p=>list.includes(p.id)).map(p=>p.family));return fam.has('rp')&&fam.has('crm')?FEE.rocketPlanWithCrm:FEE.base;};
+const feeFor=(list)=>{const fam=new Set(PACKAGES.filter(p=>list.includes(p.id)).map(p=>p.family));return fam.has('rp')&&(fam.has('crm')||fam.has('ai'))?(FEE.rocketPlanWithAddOn||FEE.rocketPlanWithCrm):FEE.base;};
 const feeMode=()=>state.spread&&state.plan!=='full'?'financed':'upfront';
 const dealFor=(plan)=>{const list=ids();return {packages:list,override:{},desc:{},plan,fee:feeFor(list),waive:false,feeMode:state.spread&&plan!=='full'?'financed':'upfront',discType:'none',discVal:0,split:[]};};
 const priced=(plan)=>RP_PRICING.compute(PACKAGES,dealFor(plan),todayISO());
