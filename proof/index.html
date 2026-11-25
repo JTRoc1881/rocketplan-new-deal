@@ -16,7 +16,7 @@ h1{font-size:24px;line-height:30px;margin:18px 0 2px;font-weight:700}.sub{color:
 .tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--green-bg);color:var(--green);margin-left:8px;vertical-align:3px}.tag.t{background:var(--amber-bg);color:var(--amber)}
 h2{font-size:15px;margin:26px 0 8px;font-weight:700;color:var(--purple)}
 table{width:100%;border-collapse:collapse}td,th{padding:7px 0;border-bottom:1px solid #ECEAF1;text-align:left;vertical-align:top;font-variant-numeric:tabular-nums}
-th{font-weight:600;font-size:12.5px;color:var(--muted)}td.k{width:190px;color:var(--muted)}td.n,th.n{text-align:right;white-space:nowrap}
+th{font-weight:600;font-size:12.5px;color:var(--muted)}td.k{width:190px;color:var(--muted)}td.n,th.n{text-align:right;white-space:nowrap}td+td,th+th{padding-left:16px}
 .quote{margin:8px 0;padding:12px 14px;background:var(--soft);border-left:3px solid var(--purple);border-radius:0 8px 8px 0}
 .quote b{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;word-break:break-all}
@@ -37,6 +37,7 @@ const when=iso=>iso?new Date(iso).toLocaleString('en-US',{timeZone:'America/Vanc
 const day=iso=>new Date(iso+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
 // the app key comes from the link once, or from this browser after New Deal has been opened in it; it never stays in the address bar
 let KEY=Q.get('k')||'';try{if(KEY){localStorage.setItem('rp_k',KEY);Q.delete('k');history.replaceState(null,'',location.pathname+(Q.toString()?'?'+Q:''));}else KEY=localStorage.getItem('rp_k')||'';}catch(e){}
+const TOKEN=(Q.get('t')||'').replace(/[^a-f0-9]/gi,'');
 const CODE=(Q.get('c')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
 function ask(msg){$('#root').innerHTML=`<div class="ask"><h1>Proof of acceptance</h1><p class="sub">${esc(msg||'Enter the order code. It is in the RocketCRM note and on the order page.')}</p><form id="f"><input id="c" maxlength="6" placeholder="ORDER CODE" value="${esc(CODE)}" autocomplete="off"><button class="go">Open</button></form></div>`;$('#f').addEventListener('submit',e=>{e.preventDefault();const c=$('#c').value.trim().toUpperCase();if(c)location.search='?c='+encodeURIComponent(c);});}
 const row=(k,v)=>v?`<tr><td class="k">${k}</td><td>${v}</td></tr>`:'';
@@ -73,7 +74,7 @@ function render(j){
   $('#bar').hidden=false;
 }
 $('#save').addEventListener('click',()=>window.print());
-if(!KEY)$('#root').innerHTML='<div class="ask"><h1>Proof of acceptance</h1><p class="sub">Open New Deal from the RocketCRM sidebar once in this browser, then reload this page.</p></div>';
+if(!KEY&&!(TOKEN&&CODE))$('#root').innerHTML='<div class="ask"><h1>Proof of acceptance</h1><p class="sub">Open this page from the link in the order\'s RocketCRM note.</p></div>';
 else if(!CODE)ask();
-else fetch(API+'/api/shop/evidence/'+CODE,{headers:{'x-app-key':KEY}}).then(async r=>{const j=await r.json().catch(()=>({}));if(r.status===401)throw new Error('Open New Deal from the RocketCRM sidebar once in this browser, then reload this page.');if(!r.ok)throw new Error(j.error||'Could not load this order.');render(j);}).catch(e=>ask(e.message));
+else fetch(API+'/api/shop/evidence/'+CODE+(TOKEN?'?t='+TOKEN:''),{headers:KEY?{'x-app-key':KEY}:{}}).then(async r=>{const j=await r.json().catch(()=>({}));if(r.status===401)throw new Error('This link cannot open that order. Use the link in the order\'s RocketCRM note.');if(!r.ok)throw new Error(j.error||'Could not load this order.');render(j);}).catch(e=>ask(e.message));
 </script></body></html>
