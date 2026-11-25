@@ -65,9 +65,7 @@ label.f.bad input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-light)}
 .bar{display:none}
 .testbar{margin:0 0 18px;padding:10px 14px;border-radius:10px;background:#FFF6DB;border:1px solid #F1DFA0;color:#6B5200;font-size:14px;line-height:20px}
 [data-step=pay] .grid,[data-step=done] .grid{grid-template-columns:minmax(0,1fr)}[data-step=pay] .sum,[data-step=done] .sum{display:none}
-.terms{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0;padding:16px 20px;background:var(--white);border:1px solid var(--card-border);border-radius:16px;font-size:14px;line-height:20px}
-.terms div{flex:1 1 220px;min-width:0}.terms dt{font-weight:600}.terms dd{margin:2px 0 0;color:var(--icon)}.terms b{color:var(--ink);font-variant-numeric:tabular-nums}
-#checkout{margin-top:16px;min-height:480px;background:var(--white);border:1px solid var(--card-border);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(30,13,71,.03)}
+#checkout{margin-top:22px;min-height:480px;background:var(--white);border:1px solid var(--card-border);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(30,13,71,.03)}
 .wait{padding:60px 20px;text-align:center;color:var(--muted);font-size:15px}
 .thanks{max-width:600px;margin:26px auto 0;padding:40px 28px;text-align:center;background:var(--white);border:1px solid var(--card-border);border-radius:16px;box-shadow:var(--lift)}
 .thanks .ok{display:inline-flex;width:64px;height:64px;border-radius:999px;background:var(--green-light);color:var(--green-dark);align-items:center;justify-content:center;font-size:30px;font-weight:700;margin-bottom:16px}
@@ -120,7 +118,6 @@ label.f.bad input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-light)}
       </section>
     </form>
     <div class="view" id="pay" hidden>
-      <dl class="terms" id="pay-terms"></dl>
       <div id="checkout"><div class="wait">Opening secure payment…</div></div>
       <div class="err" id="err3" role="alert" hidden></div>
     </div>
@@ -298,9 +295,7 @@ async function goPay(){
     const r=await fetch(API+'/api/shop/checkout',{method:'POST',headers:{'content-type':'application/json',...KEYH},body:body({contactId:state.known?FOR:undefined,rep:REP,website:$('#website').value.trim(),test:state.test||undefined})});
     const j=await r.json().catch(()=>({}));if(!r.ok||!j.clientSecret)throw new Error(j.error||'We could not open the payment form. Please try again.');
     const Stripe=await loadStripe();
-    state.order=j.code;state.summary=j.summary||[];state.busy=false;state.step='pay';$('#err3').hidden=true;
-    const bold=t=>esc(t).replace(/\$\d+(?:,\d{3})*(?:\.\d\d)?/g,'<b>$&</b>');
-    $('#pay-terms').innerHTML=state.summary.map(x=>`<div><dt>${esc(x.label)}</dt><dd>${bold(x.text)}</dd></div>`).join('');
+    state.order=j.code;state.busy=false;state.step='pay';$('#err3').hidden=true;
     history.pushState({step:'pay'},'','#pay');show();
     closeCheckout();
     state.co=await Stripe(state.pk).createEmbeddedCheckoutPage({fetchClientSecret:async()=>j.clientSecret,onComplete:()=>finish(j.code)});
