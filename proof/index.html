@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Proof of acceptance · RocketPlan</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{--purple:#9A00FF;--ink:#1E0D47;--muted:#6F6980;--line:#DCD9E4;--soft:#F6F5F9;--green:#007760;--green-bg:#DCF5F0;--amber:#6B5200;--amber-bg:#FFF6DB}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--soft);color:var(--ink);font:400 14px/21px "IBM Plex Sans",-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.bar{max-width:820px;margin:0 auto;padding:18px 20px 0;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.bar p{margin:0;color:var(--muted);font-size:13.5px;max-width:52ch}
+button,.go{border:0;border-radius:10px;background:var(--purple);color:#fff;font:600 15px/1 "IBM Plex Sans",sans-serif;height:44px;padding:0 20px;cursor:pointer}
+.doc{max-width:820px;margin:16px auto 60px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:36px 40px}
+.head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:2px solid var(--ink);padding-bottom:16px}
+.head img{height:28px;display:block}.head .r{text-align:right;font-size:12.5px;color:var(--muted)}
+h1{font-size:24px;line-height:30px;margin:18px 0 2px;font-weight:700}.sub{color:var(--muted);margin:0}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--green-bg);color:var(--green);margin-left:8px;vertical-align:3px}.tag.t{background:var(--amber-bg);color:var(--amber)}
+h2{font-size:15px;margin:26px 0 8px;font-weight:700;color:var(--purple)}
+table{width:100%;border-collapse:collapse}td,th{padding:7px 0;border-bottom:1px solid #ECEAF1;text-align:left;vertical-align:top;font-variant-numeric:tabular-nums}
+th{font-weight:600;font-size:12.5px;color:var(--muted)}td.k{width:190px;color:var(--muted)}td.n,th.n{text-align:right;white-space:nowrap}
+.quote{margin:8px 0;padding:12px 14px;background:var(--soft);border-left:3px solid var(--purple);border-radius:0 8px 8px 0}
+.quote b{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-bottom:2px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;word-break:break-all}
+.foot{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;line-height:18px;color:var(--muted)}
+.ask{max-width:420px;margin:80px auto;padding:0 20px;text-align:center}.ask input{width:100%;height:46px;border:1px solid var(--line);border-radius:10px;padding:0 14px;font:inherit;font-size:16px;margin:14px 0;text-transform:uppercase;text-align:center;letter-spacing:.1em}
+.scroll{overflow-x:auto}
+@media (max-width:640px){.doc{padding:24px 18px;border-radius:0;border-left:0;border-right:0}td.k{width:120px}}
+@media print{body{background:#fff}.bar{display:none}.doc{border:0;margin:0;padding:0;max-width:none}h2{break-after:avoid}table,.quote{break-inside:avoid}@page{margin:16mm}}
+</style></head><body>
+<div class="bar" id="bar" hidden><p>This is the record of one order. Save it as a PDF and upload it to the Stripe dispute as evidence.</p><button type="button" id="save">Save as PDF</button></div>
+<div id="root"></div>
+<script>
+const API='https://irrxupzubigjytxeeapu.supabase.co/functions/v1/new-deal';
+const Q=new URLSearchParams(location.search),$=s=>document.querySelector(s);
+const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:Math.abs(n-Math.round(n))<0.005?0:2,maximumFractionDigits:2});
+const when=iso=>iso?new Date(iso).toLocaleString('en-US',{timeZone:'America/Vancouver',dateStyle:'long',timeStyle:'medium'})+' Pacific ('+new Date(iso).toISOString().replace('T',' ').slice(0,19)+' UTC)':'';
+const day=iso=>new Date(iso+'T12:00:00Z').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
+// the app key comes from the link once, or from this browser after New Deal has been opened in it; it never stays in the address bar
+let KEY=Q.get('k')||'';try{if(KEY){localStorage.setItem('rp_k',KEY);Q.delete('k');history.replaceState(null,'',location.pathname+(Q.toString()?'?'+Q:''));}else KEY=localStorage.getItem('rp_k')||'';}catch(e){}
+const CODE=(Q.get('c')||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+function ask(msg){$('#root').innerHTML=`<div class="ask"><h1>Proof of acceptance</h1><p class="sub">${esc(msg||'Enter the order code. It is in the RocketCRM note and on the order page.')}</p><form id="f"><input id="c" maxlength="6" placeholder="ORDER CODE" value="${esc(CODE)}" autocomplete="off"><button class="go">Open</button></form></div>`;$('#f').addEventListener('submit',e=>{e.preventDefault();const c=$('#c').value.trim().toUpperCase();if(c)location.search='?c='+encodeURIComponent(c);});}
+const row=(k,v)=>v?`<tr><td class="k">${k}</td><td>${v}</td></tr>`:'';
+function render(j){
+  const a=j.acceptance,o=j.order,st=j.stripe,first=j.charges&&j.charges.length?j.charges[j.charges.length-1]:null;
+  const card=a.method==='card checkout'||!!st;
+  document.title=`Proof of acceptance ${j.code} · RocketPlan`;
+  const lines=o.lines.map(l=>`<tr><td>${esc(l.name)}<div style="color:var(--muted);font-size:12.5px">${esc(l.desc)}</div></td><td class="n">${money(l.amount)}</td></tr>`).join('')+(o.fee?`<tr><td>Set Up Fee<div style="color:var(--muted);font-size:12.5px">One time${o.feeMode==='financed'?', spread over the payments':''}</div></td><td class="n">${money(o.fee)}</td></tr>`:'')+`<tr><td><b>First-year total</b></td><td class="n"><b>${money(o.total)}</b></td></tr>`;
+  const charges=(j.charges||[]).slice().reverse().map(c=>`<tr><td>${esc(when(c.at).split(' Pacific')[0])}</td><td class="n">${money(c.amount)}</td><td>${esc(c.card)}${c.cardCountry?' ('+esc(c.cardCountry)+')':''}</td><td>${esc(c.cvcCheck||'n/a')} / ${esc(c.postalCheck||'n/a')}</td><td>${esc(c.status)}${c.refunded?', refunded '+money(c.refunded):''}${c.disputed?', disputed':''}</td></tr>`).join('');
+  $('#root').innerHTML=`<div class="doc">
+  <div class="head"><img src="https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c69030ace6166590c7d808e_1200_80.webp" alt="RocketPlan"><div class="r">${esc(j.merchant)}<br>Generated ${esc(when(j.generatedAt).split(' (')[0])}</div></div>
+  <h1>Proof of order acceptance${j.test?'<span class="tag t">Test order, not a real customer</span>':'<span class="tag">Accepted and paid</span>'}</h1>
+  <p class="sub">Order ${esc(j.code)}. The customer placed this order online, ticked the box agreeing to the terms, and paid by card.</p>
+  <h2>1. Customer</h2><table>${row('Name',esc(j.customer.name))}${row('Company',esc(j.customer.company))}${row('Email',esc(j.customer.email))}</table>
+  <h2>2. What was ordered</h2><table>${lines}</table>
+  <table style="margin-top:6px">${row('Payment plan',esc(o.charges)+'.')}${row('Renewal',`Automatic on ${day(o.renews)} at the then-current list price, ${money(o.annualList)} per year when ordered.`)}</table>
+  <h2>3. What the customer agreed to</h2>
+  <p style="margin:0">${card?'These words were shown inside the payment form. The first is a tick box that must be ticked before the payment can be made; the second sits directly above the pay button.':'These statements were shown as tick boxes; both had to be ticked to place the order.'}</p>
+  ${(a.statements||[]).map((t,i)=>`<div class="quote"><b>${card?(i===0?'Tick box (required)':'Shown above the pay button'):'Tick box '+(i+1)}</b>${esc(t)}</div>`).join('')}
+  ${(a.summary||[]).length?`<table>${a.summary.map(r=>row(esc(r.label),esc(r.text))).join('')}</table>`:''}
+  <table style="margin-top:6px">
+    ${row('Terms box',a.termsOfService?`Ticked. Stripe's own record for this checkout reads "terms of service: ${esc(a.termsOfService)}".`:'Ticked on the RocketPlan order page.')}
+    ${row('Accepted and paid',esc(when(a.at)))}${row('Form opened',a.shownAt?esc(when(a.shownAt)):'')}
+    ${row('IP address',a.ip?esc(a.ip)+(a.shownAt?' (when the payment form was opened)':''):'')}${row('Browser',esc(a.userAgent))}
+    ${row('Terms & Conditions',`${esc(a.terms)}${a.termsVersion?`<br>${esc(a.termsVersion.version||'')}<br><span class="mono">Text fingerprint (SHA-256): ${esc(a.termsVersion.sha256)}</span>`:''}`)}
+    ${row('Privacy Policy',`${esc(a.privacy)}${a.privacyVersion?`<br>${esc(a.privacyVersion.version||'')}<br><span class="mono">Text fingerprint (SHA-256): ${esc(a.privacyVersion.sha256)}</span>`:''}`)}
+    ${row('Refunds and cancelling','The statement above the pay button says: cancel in writing before the renewal date; fees are non-refundable. Terms & Conditions, Part B, section 3.')}
+  </table>
+  ${charges?`<h2>4. Card payments</h2><div class="scroll"><table><tr><th>Date (Pacific)</th><th class="n">Amount</th><th>Card</th><th>CVC / postal code check</th><th>Status</th></tr>${charges}</table></div>
+  <table style="margin-top:6px">${first?row('Name on card',esc(first.billingName))+row('Billing postal code',esc([first.billingPostal,first.billingCountry].filter(Boolean).join(', ')))+row('Receipt',first.receipt?`<span class="mono">${esc(first.receipt)}</span>`:''):''}${st?row('Stripe references',`<span class="mono">Checkout ${esc(st.session)}<br>Customer ${esc(st.customer)}<br>Subscription ${esc(st.subscription)}${first?'<br>First charge '+esc(first.id):''}</span>`):''}</table>`:(j.chargeNote?`<h2>4. Card payments</h2><p>Could not read the payments from Stripe: ${esc(j.chargeNote)}</p>`:'')}
+  <h2>${charges?5:4}. Copy sent to the customer</h2><table>${row('Confirmation email',j.confirmation?(j.confirmation.email==='sent'?`Sent to ${esc(j.customer.email)} when the payment went through, with the order, the payments, the renewal and the statements above.`:esc(j.confirmation.email)):'Not recorded')}${row('Order page',`<span class="mono">${esc(j.orderPage)}</span>`)}</table>
+  <h2>${charges?6:5}. Timeline</h2><table>${j.timeline.map(t=>`<tr><td class="k" style="width:300px">${esc(when(t.at).split(' (')[0])}</td><td>${esc(t.what)}${t.amount!=null?' ('+money(t.amount)+')':''}</td></tr>`).join('')}</table>
+  <p class="foot">This record was written by RocketPlan's order system at the time of each event and is unchanged since. The statements in section 3 are stored word for word as shown to the customer. The fingerprints identify the exact text of the Terms & Conditions and Privacy Policy published when the order was accepted; dated copies are kept by RocketPlan.</p></div>`;
+  $('#bar').hidden=false;
+}
+$('#save').addEventListener('click',()=>window.print());
+if(!KEY)$('#root').innerHTML='<div class="ask"><h1>Proof of acceptance</h1><p class="sub">Open New Deal from the RocketCRM sidebar once in this browser, then reload this page.</p></div>';
+else if(!CODE)ask();
+else fetch(API+'/api/shop/evidence/'+CODE,{headers:{'x-app-key':KEY}}).then(async r=>{const j=await r.json().catch(()=>({}));if(r.status===401)throw new Error('Open New Deal from the RocketCRM sidebar once in this browser, then reload this page.');if(!r.ok)throw new Error(j.error||'Could not load this order.');render(j);}).catch(e=>ask(e.message));
+</script></body></html>
