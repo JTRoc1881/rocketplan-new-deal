@@ -63,9 +63,18 @@ label.f.bad input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-light)}
 .err{margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--red-light);color:var(--red);font-size:14px;line-height:20px}
 .foot{margin-top:28px;font-size:13px;color:var(--muted);text-align:center}
 .bar{display:none}
+.testbar{margin:0 0 18px;padding:10px 14px;border-radius:10px;background:#FFF6DB;border:1px solid #F1DFA0;color:#6B5200;font-size:14px;line-height:20px}
+[data-step=pay] .grid,[data-step=done] .grid{grid-template-columns:minmax(0,1fr)}[data-step=pay] .sum,[data-step=done] .sum{display:none}
+.terms{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0;padding:16px 20px;background:var(--white);border:1px solid var(--card-border);border-radius:16px;font-size:14px;line-height:20px}
+.terms div{flex:1 1 220px;min-width:0}.terms dt{font-weight:600}.terms dd{margin:2px 0 0;color:var(--icon)}.terms b{color:var(--ink);font-variant-numeric:tabular-nums}
+#checkout{margin-top:16px;min-height:480px;background:var(--white);border:1px solid var(--card-border);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(30,13,71,.03)}
+.wait{padding:60px 20px;text-align:center;color:var(--muted);font-size:15px}
+.done{max-width:600px;margin:26px auto 0;padding:40px 28px;text-align:center;background:var(--white);border:1px solid var(--card-border);border-radius:16px;box-shadow:var(--lift)}
+.done .ok{display:inline-flex;width:64px;height:64px;border-radius:999px;background:var(--green-light);color:var(--green-dark);align-items:center;justify-content:center;font-size:30px;font-weight:700;margin-bottom:16px}
+.done h1{font-size:30px;line-height:36px}.done p{margin:12px auto 0;max-width:46ch;color:var(--icon);font-size:16px;line-height:24px}.done .code{margin-top:20px;font-size:14px;color:var(--muted)}.done .btn{display:inline-flex;width:auto;padding:0 26px;text-decoration:none;margin-top:24px}
 .fail{max-width:560px;margin:80px auto;padding:0 20px;text-align:center;color:var(--muted);font-size:17px}
 @media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.sum{position:static}.tiers{grid-template-columns:minmax(0,1fr)}
-  [data-step=review] .sum{order:-1}[data-step=review] .sum .note{display:none}
+  [data-step=review] .sum{order:-1}[data-step=pay] .bar,[data-step=done] .bar{display:none}[data-step=review] .sum .note{display:none}
   .bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:5;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--white);border-top:1px solid var(--card-border);box-shadow:0 -6px 20px rgba(30,13,71,.08)}
   .bar .l{font-size:12px;color:var(--muted)}.bar .v{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}.bar button{display:inline-flex;align-items:center;height:46px;padding:0 22px;border:0;border-radius:10px;background:var(--purple);color:#fff;font:600 16px/1 "IBM Plex Sans",sans-serif;cursor:pointer}}
 @media (max-width:560px){h1{font-size:28px;line-height:34px}.top{margin-bottom:24px}.addons,.form{grid-template-columns:minmax(0,1fr)}.sec{padding:18px 16px 20px}.plan .card{grid-template-columns:auto 1fr}.plan .amt{grid-column:2;text-align:left}
@@ -73,10 +82,12 @@ label.f.bad input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-light)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style></head><body>
 <div class="wrap" id="root" data-step="choose">
+  <div class="testbar" id="testbar" hidden>Test mode. No real card is charged and no customer is created. Use card 4242 4242 4242 4242, any future date and any 3 digits.</div>
   <div class="top"><img src="https://rocketplantech.com/wp-content/uploads/2025/03/ca3905fc1c69030ace6166590c7d808e_1200_80.webp" alt="RocketPlan">
     <ol class="steps" aria-label="Steps"><li data-s="choose"><b>1</b><span>Choose</span></li><li data-s="review"><b>2</b><span>Review and accept</span></li><li data-s="pay"><b>3</b><span>Pay</span></li></ol></div>
   <div id="head-choose"><p class="for" id="for" hidden></p><h1>Choose your RocketPlan package</h1><p class="lede">Pick what fits your team and see the exact price. Every package is a 12-month subscription.</p></div>
   <div id="head-review" hidden><a class="back" href="#" id="back"><span aria-hidden="true">←</span> Change packages</a><h1>Review and accept</h1><p class="lede">One screen, then secure card payment. Nothing is charged on this page.</p></div>
+  <div id="head-pay" hidden><a class="back" href="#" id="back2"><span aria-hidden="true">←</span> Change packages</a><h1>Pay securely</h1><p class="lede">Your details and card, once, on this screen. Your order is confirmed the moment the payment goes through.</p></div>
   <div class="grid">
     <div class="view" id="choose">
       <section class="sec"><h2>RocketPlan</h2><p class="sub">Job documentation for restoration teams. Choose the size of your team.</p><div class="tiers" id="tiers"></div></section>
@@ -108,6 +119,16 @@ label.f.bad input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-light)}
         <p class="secure"><svg width="14" height="16" viewBox="0 0 14 16" fill="none" aria-hidden="true"><rect x="1" y="6.5" width="12" height="8.5" rx="2" fill="#777185"/><path d="M4 6.5V4.5a3 3 0 0 1 6 0v2" stroke="#777185" stroke-width="1.6"/></svg><span id="secure-txt"></span></p>
       </section>
     </form>
+    <div class="view" id="pay" hidden>
+      <dl class="terms" id="pay-terms"></dl>
+      <div id="checkout"><div class="wait">Opening secure payment…</div></div>
+      <div class="err" id="err3" role="alert" hidden></div>
+    </div>
+    <div class="view" id="done" hidden><div class="done">
+      <div class="ok" aria-hidden="true">✓</div><h1 id="done-h">Thank you. Your order is confirmed.</h1>
+      <p id="done-p"></p><p id="done-next">We will be in touch shortly to get your team set up.</p>
+      <a class="btn" id="done-link" href="#">View your order</a><div class="code" id="done-code"></div>
+    </div></div>
     <aside class="sum" id="summary">
       <p class="eyebrow">Your order</p><h2>Summary</h2>
       <div id="lines"><div class="empty">Pick a package to see your price.</div></div>
@@ -119,7 +140,7 @@ label.f.bad input{border-color:var(--red);box-shadow:0 0 0 3px var(--red-light)}
       <div id="go-wrap">
         <button class="btn" id="go" type="button" disabled>Continue</button>
         <div class="err" id="err" role="alert" hidden></div>
-        <p class="next">No forms yet. Next you review and accept your order on one screen, then pay by card.</p>
+        <p class="next" id="next-txt">No forms yet. Next you review and accept your order on one screen, then pay by card.</p>
       </div>
     </aside>
   </div>
@@ -138,8 +159,10 @@ const todayISO=()=>new Date().toLocaleDateString('en-CA',{timeZone:'America/Vanc
 const REP=(Q.get('rep')||'').replace(/[^\p{L}\p{N} .'-]/gu,'').trim().slice(0,40);
 // a personal link names a RocketCRM contact (?for=<contact id>), so that customer types nothing
 const FOR=/^[A-Za-z0-9]{16,32}$/.test(Q.get('for')||'')?Q.get('for'):'';
+// a rep can try the card checkout in Stripe's sandbox: ?k=<app key>&test=1
+const KEY=Q.get('test')==='1'?(Q.get('k')||''):'',KEYH=KEY?{'x-app-key':KEY}:{};
 let PACKAGES=[],PLANS=['full','quarterly','monthly'],FEE={base:1500,rocketPlanWithAddOn:2500};
-const state={tier:null,addons:new Set(),plan:'full',spread:false,busy:false,step:'choose',known:null,statements:null,summary:null};
+const state={tier:null,addons:new Set(),plan:'full',spread:false,busy:false,step:'choose',known:null,statements:null,summary:null,checkout:'invoice',pk:'',test:false,co:null,order:null};
 
 const ids=()=>[...(state.tier?[state.tier]:[]),...state.addons];
 const feeFor=(list)=>{const fam=new Set(PACKAGES.filter(p=>list.includes(p.id)).map(p=>p.family));return fam.has('rp')&&(fam.has('crm')||fam.has('ai'))?(FEE.rocketPlanWithAddOn||FEE.rocketPlanWithCrm):FEE.base;};
@@ -184,12 +207,14 @@ function render(){
     h+=`<div class="line"><span class="l">Set Up Fee<small>one time · onboarding, account setup and training${n>1?(p.feeMode==='financed'?' · spread over '+n+' payments':' · with your first payment'):''}</small></span><span class="v">${money2(p.fee)}</span></div>`;
     $('#lines').innerHTML=h;$('#money').hidden=false;
     $('#tot-l').textContent=n>1?`First-year total (${n} payments)`:'First-year total';$('#tot-v').textContent=money2(p.total);
-    $('#today-v').textContent=money2(p.today);$('#bar-v').textContent=money2(p.today);$('#bar').hidden=review;
+    $('#today-v').textContent=money2(p.today);$('#bar-v').textContent=money2(p.today);$('#bar').hidden=state.step!=='choose';
     $('#today-s').textContent=n===1?'One payment for your first year, setup included.':p.rest?`Then ${p.rest.count} ${word} payments of ${money2(p.rest.amount)}, from ${fmtDate(p.payments[1].date)} to ${fmtDate(p.rest.lastDate)}, charged to the same card.`:'';
     $('#renew').innerHTML=`<span>Renews <b>${fmtDate(p.renews)}</b> at <b>${money(p.annualList)} a year</b>, charged to the same card. Cancel any time before then.</span>`;
     if(review)renderReview(p,word);
   }
-  $('#go').disabled=!has||state.busy;$('#go').textContent=state.busy&&!review?'One moment…':'Continue';$('#bar-go').disabled=!has||state.busy;
+  const card=state.checkout==='stripe';
+  $('#go').disabled=!has||state.busy;$('#go').textContent=state.busy&&!review?'One moment…':card?'Continue to payment':'Continue';$('#bar-go').disabled=!has||state.busy;$('#bar-go').textContent=card?'Pay':'Continue';
+  $('#next-txt').textContent=card?'Next: pay securely by card. Your details and card are entered once, on one screen.':'No forms yet. Next you review and accept your order on one screen, then pay by card.';
   $('#accept').disabled=state.busy;$('#accept').textContent=state.busy&&review?'Placing your order…':'Accept and continue to payment';
 }
 
@@ -211,11 +236,14 @@ function renderReview(p,word){
   $('#who-sub').textContent=k?(need.length?'We have most of your details. Just add what is missing.':'We already have your details. Nothing to type.'):'Your confirmation and receipt go here. Your browser can fill this in for you.';
 }
 function show(){
-  const review=state.step==='review';
-  $('#root').dataset.step=state.step;
-  $('#choose').hidden=review;$('#review').hidden=!review;$('#head-choose').hidden=review;$('#head-review').hidden=!review;$('#go-wrap').hidden=review;
-  for(const li of document.querySelectorAll('.steps li')){const s=li.dataset.s;li.classList.toggle('on',s===state.step);li.classList.toggle('done',review&&s==='choose');li.querySelector('b').textContent=review&&s==='choose'?'✓':{choose:1,review:2,pay:3}[s];}
-  document.title=review?'Review and accept · RocketPlan':'Choose your RocketPlan package';
+  const st=state.step,review=st==='review';
+  $('#root').dataset.step=st;
+  $('#choose').hidden=st!=='choose';$('#review').hidden=!review;$('#pay').hidden=st!=='pay';$('#done').hidden=st!=='done';
+  $('#head-choose').hidden=st!=='choose';$('#head-review').hidden=!review;$('#head-pay').hidden=st!=='pay';$('#go-wrap').hidden=st!=='choose';
+  // the steps shown depend on the checkout: card on this page is two steps, the invoice path is three
+  const order=state.checkout==='stripe'?['choose','pay']:['choose','review','pay'],at=st==='done'?order.length:order.indexOf(st);
+  for(const li of document.querySelectorAll('.steps li')){const k=order.indexOf(li.dataset.s);li.hidden=k<0;if(k<0)continue;li.classList.toggle('on',k===at);li.classList.toggle('done',k<at);li.querySelector('b').textContent=k<at?'✓':k+1;}
+  document.title=st==='done'?'Order confirmed · RocketPlan':st==='pay'?'Pay securely · RocketPlan':review?'Review and accept · RocketPlan':'Choose your RocketPlan package';
   render();window.scrollTo(0,0);
 }
 function fail(msg,sel){const e=$(sel||(state.step==='review'?'#err2':'#err'));e.textContent=msg;e.hidden=false;e.scrollIntoView({block:'nearest',behavior:'smooth'});}
@@ -259,8 +287,42 @@ async function accept(){
   }catch(e){state.busy=false;render();fail(offline(e));}
 }
 
-fetch(API+'/api/shop').then(r=>{if(!r.ok)throw new Error('unavailable');return r.json();}).then(c=>{
+// ---- card checkout on this page (Stripe embedded Checkout) ----
+let stripeJs=null;
+const loadStripe=()=>stripeJs||(stripeJs=new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://js.stripe.com/endive/stripe.js';s.onload=()=>ok(window.Stripe);s.onerror=()=>{stripeJs=null;no(new Error('We could not load the payment form. Check your connection and try again.'));};document.head.appendChild(s);}));
+function closeCheckout(){if(state.co){try{state.co.destroy();}catch(e){}state.co=null;}$('#checkout').innerHTML='<div class="wait">Opening secure payment…</div>';}
+async function goPay(){
+  if(state.busy||!ids().length)return;
+  $('#err').hidden=true;state.busy=true;render();
+  try{
+    const r=await fetch(API+'/api/shop/checkout',{method:'POST',headers:{'content-type':'application/json',...KEYH},body:body({contactId:state.known?FOR:undefined,rep:REP,website:$('#website').value.trim(),test:state.test||undefined})});
+    const j=await r.json().catch(()=>({}));if(!r.ok||!j.clientSecret)throw new Error(j.error||'We could not open the payment form. Please try again.');
+    const Stripe=await loadStripe();
+    state.order=j.code;state.summary=j.summary||[];state.busy=false;state.step='pay';$('#err3').hidden=true;
+    const bold=t=>esc(t).replace(/\$\d+(?:,\d{3})*(?:\.\d\d)?/g,'<b>$&</b>');
+    $('#pay-terms').innerHTML=state.summary.map(x=>`<div><dt>${esc(x.label)}</dt><dd>${bold(x.text)}</dd></div>`).join('');
+    history.pushState({step:'pay'},'','#pay');show();
+    closeCheckout();
+    state.co=await Stripe(state.pk).createEmbeddedCheckoutPage({fetchClientSecret:async()=>j.clientSecret,onComplete:()=>finish(j.code)});
+    $('#checkout').innerHTML='';state.co.mount('#checkout');
+  }catch(e){state.busy=false;if(state.step==='pay'){$('#err3').textContent=offline(e);$('#err3').hidden=false;$('#checkout').innerHTML='';}else{render();fail(offline(e),'#err');}}
+}
+// the payment went through: have the server finish the order, then show the confirmation
+async function finish(code){
+  let j=null;
+  for(let i=0;i<8;i++){try{const r=await fetch(API+'/api/shop/done/'+code,{method:'POST'});j=await r.json();if(j.status==='paid')break;}catch(e){}await new Promise(ok=>setTimeout(ok,1500));}
+  if(state.co){try{state.co.destroy();}catch(e){}state.co=null;}
+  const paid=j&&j.status==='paid';
+  $('#done-h').textContent=paid&&j.first?`Thank you, ${j.first}. Your order is confirmed.`:'Thank you. Your order is confirmed.';
+  $('#done-p').textContent=paid?`We charged ${money2(j.today)} to your card. Your receipt and a copy of your order are on their way${j.email?' to '+j.email:''}.`:'Your payment went through. Your receipt and a copy of your order are on their way to your email.';
+  $('#done-code').textContent='Order '+code;$('#done-link').href=(paid&&j.link)||('/?c='+code);
+  state.step='done';history.replaceState({step:'done'},'',location.pathname+location.search);show();
+}
+
+fetch(API+'/api/shop'+(KEY?'?test=1':''),{headers:KEYH}).then(r=>{if(!r.ok)throw new Error('unavailable');return r.json();}).then(c=>{
   PACKAGES=c.packages;if(Array.isArray(c.plans)&&c.plans.length)PLANS=c.plans;if(c.fee)FEE=c.fee;
+  if(c.checkout==='stripe'&&c.pk){state.checkout='stripe';state.pk=c.pk;state.test=!!c.test;$('#testbar').hidden=!c.test;}
+  const next=()=>state.checkout==='stripe'?goPay():goReview();
   const forLine=()=>{const k=state.known,who=k?[k.first,k.company].filter(Boolean).join(' at '):'';const t=who?`Prepared for ${who}${REP?' by '+REP:''}`:REP?`Prepared by ${REP}`:'';$('#for').textContent=t;$('#for').hidden=!t;};
   forLine();
   if(FOR)fetch(API+'/api/shop/contact/'+FOR).then(r=>r.ok?r.json():null).then(k=>{if(k&&Array.isArray(k.need)){state.known=k;forLine();render();}}).catch(()=>{});
@@ -279,15 +341,19 @@ fetch(API+'/api/shop').then(r=>{if(!r.ok)throw new Error('unavailable');return r
   $('#addons').addEventListener('change',e=>{const i=e.target;if(i.name!=='addon')return;if(i.checked)state.addons.add(i.value);else state.addons.delete(i.value);state.statements=null;render();});
   $('#plans').addEventListener('change',e=>{if(e.target.name==='plan'){state.plan=e.target.value;state.statements=null;render();}});
   $('#spread').addEventListener('change',e=>{state.spread=e.target.checked;state.statements=null;render();});
-  $('#go').addEventListener('click',goReview);$('#bar-go').addEventListener('click',goReview);
+  $('#go').addEventListener('click',next);$('#bar-go').addEventListener('click',next);
+  $('#back2').addEventListener('click',e=>{e.preventDefault();if(history.state&&history.state.step==='pay')history.back();else{closeCheckout();state.step='choose';show();}});
   $('#review').addEventListener('submit',e=>{e.preventDefault();accept();});
   $('#back').addEventListener('click',e=>{e.preventDefault();if(state.busy)return;if(history.state&&history.state.step==='review')history.back();else{state.step='choose';show();}});
   $('#notyou').addEventListener('click',()=>{state.known=null;forLine();render();$('#name').focus();});
   $('#fields').addEventListener('focusout',e=>{const l=e.target.closest('label.f');if(l&&e.target.value.trim())checkField(l);});
   $('#fields').addEventListener('input',e=>{const l=e.target.closest('label.f');if(l&&l.classList.contains('bad'))checkField(l);});
   $('#ticks').addEventListener('change',()=>{if($('#agree').checked&&$('#authorize').checked){$('#ticks').classList.remove('bad');$('#err2').hidden=true;}});
-  window.addEventListener('popstate',()=>{if(state.busy)return;state.step=location.hash==='#review'&&ids().length&&state.statements?'review':'choose';show();});
-  if(location.hash==='#review')history.replaceState(null,'',location.pathname+location.search);
+  window.addEventListener('popstate',()=>{if(state.busy||state.step==='done')return;if(state.step==='pay')closeCheckout();state.step=location.hash==='#review'&&ids().length&&state.statements?'review':'choose';show();});
+  if(location.hash==='#review'||location.hash==='#pay')history.replaceState(null,'',location.pathname+location.search);
+  // back from a bank's confirmation page: finish the order it names
+  const doneCode=(Q.get('done')||'').toUpperCase();
+  if(/^[A-Z0-9]{6}$/.test(doneCode)){state.step='pay';show();finish(doneCode);return;}
   show();
 }).catch(()=>{$('#root').innerHTML='<p class="fail">This page could not load the RocketPlan packages. Please refresh, or contact RocketPlan and we will set your order up for you.</p>';});
 </script></body></html>
